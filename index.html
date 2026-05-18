@@ -354,8 +354,8 @@
         </div>
         
         <div class="mb-24 flex flex-col items-center">
-            <div class="w-full max-w-[340px] rounded-2xl overflow-hidden border border-[#D1D1D1] shadow-sm mb-6 bg-[#FDFDFD]">
-                <img src="./images/area-map.png" alt="菁桐平溪區域地圖" onerror="this.src='https://placehold.co/340x220?text=Area+Map'" class="w-full h-auto object-cover">
+            <div class="w-full max-w-[340px] rounded-2xl border border-[#D1D1D1] shadow-sm mb-6 bg-[#FDFDFD] p-1.5 flex justify-center items-center">
+                <img src="./images/area-map.png" alt="菁桐平溪區域地圖" onerror="this.src='https://placehold.co/340x220?text=Area+Map'" class="w-full h-auto object-contain rounded-xl block">
             </div>
             <button onclick="navTo('page-privacy')" class="btn-primary">進入體驗</button>
         </div>
@@ -414,8 +414,8 @@
         <h2 class="text-2xl font-bold text-[#2B2D2F] mt-16 mb-4">導覽地圖</h2>
         <p class="text-xs text-[#2B2D2F]/60 mb-6">平溪菁桐周邊探索路線</p>
         
-        <div class="w-full rounded-2xl overflow-hidden border border-[#D1D1D1] shadow-sm mb-24 bg-[#FDFDFD]">
-            <img src="./images/overall-map.png" alt="平溪菁桐整體導覽地圖" onerror="this.src='https://placehold.co/400x500?text=Overall+Map'" class="w-full h-auto">
+        <div class="w-full rounded-2xl border border-[#D1D1D1] shadow-sm mb-24 bg-[#FDFDFD] p-2 flex justify-center items-center">
+            <img src="./images/overall-map.png" alt="平溪菁桐整體導覽地圖" onerror="this.src='https://placehold.co/400x500?text=Overall+Map'" class="w-full h-auto object-contain rounded-xl block">
         </div>
     </div>
 
@@ -487,7 +487,7 @@
         <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-6">
             走進平溪菁桐之中，尋找那些被時間留下的情緒痕跡，每個地點，都藏著一段等待被看見的心情。
         </p>
-        <div class="relative w-full h-40 bg-[#FDFDFD] rounded-2xl overflow-hidden border border-[#D1D1D1] mb-6 shadow-inner">
+        <div class="relative w-full aspect-[4/3] min-h-[250px] bg-[#FDFDFD] rounded-2xl overflow-hidden border border-[#D1D1D1] mb-6 shadow-inner">
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')] opacity-10 mix-blend-multiply"></div>
             <div class="absolute top-[20%] left-[30%] location-dot" onclick="scrollToModule('mod-xiaozi')"></div>
             <div class="absolute top-[50%] left-[60%] location-dot" onclick="scrollToModule('mod-shelter')"></div>
@@ -626,8 +626,8 @@
             <div id="story-pages-container" class="relative z-10 text-[#2B2D2F]">
                 <div class="story-content-page active" id="story-page-1">
                     <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">序言</h3>
-                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
-                        <img src="./images/story-1.png" alt="序言配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+1'" class="w-full h-auto object-cover">
+                    <div class="w-full max-w-[280px] mx-auto rounded-xl border border-[#D1D1D1] mb-5 bg-[#FDFDFD] p-1.5 shadow-sm">
+                        <img src="./images/story-1.png" alt="序言配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+1'" class="w-full h-auto max-h-[180px] object-contain rounded-lg block">
                     </div>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">這裡曾是台灣煤礦時代中一座被山與鐵道喚醒的小鎮。日治時期，隨著礦業開發與 1921 年平溪線鐵路的完工，煤炭得以穩定輸出，這裡逐漸成為平溪地區的重要礦業據點，由台陽礦業公司主導經營。街道、建築與生活節奏，都隨著礦業的繁榮而運轉，吸引了大量勞工匯聚。</p>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">戰後，礦業由政府接管並持續發展，平溪成為台灣重要的煤礦核心之一。然而，到了 1970 年代能源結構轉變，加上礦坑開採成本高、災害頻繁，煤礦產業逐漸走向衰退。國際煤炭進口取代了本地生產，使礦區在 1990 年代全面停採，最終由重光煤礦於 1997 至 1998 年間停產，為這段長達百年的礦業歷史劃下句點。</p>
@@ -636,8 +636,8 @@
 
                 <div class="story-content-page" id="story-page-2">
                     <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">清晨：命是天的，有拚才有飯吃</h3>
-                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
-                        <img src="./images/story-2.png" alt="礦工生活配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+2'" class="w-full h-auto object-cover">
+                    <div class="w-full max-w-[280px] mx-auto rounded-xl border border-[#D1D1D1] mb-5 bg-[#FDFDFD] p-1.5 shadow-sm">
+                        <img src="./images/story-2.png" alt="礦工生活配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+2'" class="w-full h-auto max-h-[180px] object-contain rounded-lg block">
                     </div>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">清晨總是飄著毛毛雨。我吃完早餐，看著熟睡的小孩，隨即壓下牽掛走出家門。走到坑口，我交出「火牌仔」換取頭燈。老礦工常說：「入坑前，我們是活人；入坑後，命是天的。」</p>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">我們大多不是領月薪。負責挖坑道的「掘進工」按距離算錢；我是「採煤工」，工資取決於產出多少車煤炭。有拚才有飯吃。</p>
@@ -656,8 +656,8 @@
 
                 <div class="story-content-page" id="story-page-3">
                     <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">坑內</h3>
-                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
-                        <img src="./images/story-3.png" alt="坑內配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+3'" class="w-full h-auto object-cover">
+                    <div class="w-full max-w-[280px] mx-auto rounded-xl border border-[#D1D1D1] mb-5 bg-[#FDFDFD] p-1.5 shadow-sm">
+                        <img src="./images/story-3.png" alt="坑內配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+3'" class="w-full h-auto max-h-[180px] object-contain rounded-lg block">
                     </div>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">礦坑內悶熱得像高達 40°C 的大烤箱。我全身只穿一條短褲，汗水混合著煤屑，在皮膚上流成黑色的溝壑。</p>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">四周不時傳來支撐坑道的「相思木」受壓發出的吱吱聲。俗話說：「相思木在嚎，人就要緊走。」 但兄弟間的互相照應，減輕了我的恐懼。在這裡，我們不談明天。</p>
@@ -673,8 +673,8 @@
 
                 <div class="story-content-page" id="story-page-4">
                     <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">出坑與下班：今朝有酒今朝醉</h3>
-                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
-                        <img src="./images/story-4.png" alt="下班生活配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+4'" class="w-full h-auto object-cover">
+                    <div class="w-full max-w-[280px] mx-auto rounded-xl border border-[#D1D1D1] mb-5 bg-[#FDFDFD] p-1.5 shadow-sm">
+                        <img src="./images/story-4.png" alt="下班生活配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+4'" class="w-full h-auto max-h-[180px] object-contain rounded-lg block">
                     </div>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">當做完工作，搭著台車爬出坑口，看見陽光的那一刻，我深深吸了一大口帶有泥土味的空氣。我還回工具，拿回我的火牌仔——太好了，今天也平安活著出來了。</p>
                     <p class="text-[14px] leading-[2em] mb-4 text-justify">下班後走街上，我買了幾瓶米酒，喜歡和礦場的兄弟們天天把酒言歡，感慨著坑裡的驚險。</p>
