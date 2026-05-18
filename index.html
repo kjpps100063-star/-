@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菁森呼溪 (JINGTONG)(PINGXI) TRAVEL COMPANION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 導入日系明朝體與思源宋體，營造雜誌排版感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Shippori Mincho', 'Noto Serif TC', serif;
+            background-color: #FDFDFD; /* 極簡冷白 */
+            color: #2B2D2F; /* 礦石黑 */
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #app-container {
+            width: 100vw;
+            height: 100dvh;
+            background: #FDFDFD;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 底片顆粒/紙張紋理效果 */
+        #app-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            z-index: 9999;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 24px;
+            overflow-y: auto;
+            background: #FDFDFD;
+            box-sizing: border-box;
+        }
+
+        .hidden-page { transform: translateX(100%); }
+        .active-page { transform: translateX(0); }
+
+        /* 右上角小標按鈕 */
+        .top-nav {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-icon-btn {
+            background: #e26a1f; /* 明亮橘底色 */
+            backdrop-filter: blur(4px);
+            border: 1px solid #e26a1f;
+            color: #FDFDFD; /* 極簡冷白圖示 */
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+
+        .nav-icon-btn:active {
+            background: rgba(253, 253, 253, 0.9);
+            color: #e26a1f;
+        }
+
+        .btn-primary {
+            background-color: #e26a1f;
+            color: #FDFDFD;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            transition: all 0.3s;
+            text-align: center;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            letter-spacing: 2px;
+        }
+
+        .btn-secondary {
+            border: 1px solid #e26a1f;
+            color: #e26a1f;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:active { background: #e26a1f; color: #FDFDFD; }
+
+        .tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #D1D1D1; /* 淺霧灰 */
+            margin: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #FDFDFD;
+            color: #2B2D2F;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .tag.selected {
+            background-color: #e26a1f;
+            color: #FDFDFD;
+            border-color: #e26a1f;
+        }
+
+        .card-crayon {
+            border: 1px solid #D1D1D1;
+            border-radius: 16px;
+            padding: 16px;
+            background: #FDFDFD;
+            box-shadow: 3px 3px 0px #D1D1D1;
+            margin-bottom: 20px;
+        }
+
+        .location-dot {
+            width: 20px;
+            height: 20px;
+            background-color: #e26a1f;
+            border-radius: 50%;
+            border: 3px solid #FDFDFD;
+            position: absolute;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(226, 106, 31, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(226, 106, 31, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(226, 106, 31, 0); }
+        }
+
+        .sub-narrative {
+            font-size: 14px;
+            color: #2B2D2F;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 30px;
+            left: 20px;
+            font-size: 20px;
+            color: #e26a1f;
+            cursor: pointer;
+            z-index: 100;
+            padding: 5px;
+        }
+
+        .module-title {
+            font-family: 'Shippori Mincho', 'Noto Serif TC', serif;
+            color: #2B2D2F;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 隱藏橫向滾動條 */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 自訂提示框 */
+        #custom-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            background: #e26a1f;
+            color: #FDFDFD;
+            padding: 12px 20px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(226, 106, 31, 0.3);
+            z-index: 10000;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            width: max-content;
+            max-width: 85vw;
+            line-height: 1.5;
+            text-align: left;
+        }
+        #custom-alert i { flex-shrink: 0; margin-top: 2px; }
+        #custom-alert.show { transform: translateX(-50%) translateY(0); }
+
+        /* 輕柔細緻的自然波紋動畫 */
+        @keyframes wave-ripple-soft {
+            0% { transform: scaleY(0.2); opacity: 0.4; }
+            100% { transform: scaleY(1); opacity: 0.9; }
+        }
+        
+        .wave-bar {
+            width: 3px;
+            border-radius: 4px;
+            background-color: #e26a1f;
+            box-shadow: 0 0 6px rgba(226, 106, 31, 0.3);
+            transform-origin: center;
+            animation-name: wave-ripple-soft;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+            animation-timing-function: ease-in-out;
+            animation-play-state: paused;
+            margin: 0 2px;
+            position: relative;
+            z-index: 1;
+            transition: opacity 0.5s ease;
+            opacity: 0.3;
+        }
+        .wave-bar.playing {
+            animation-play-state: running;
+            opacity: 0.8;
+        }
+
+        .firefly-wrapper {
+            position: absolute;
+            bottom: 35px;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+        }
+        .firefly-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #FCD34D;
+            border-radius: 50%;
+            animation: firefly-glow 1s infinite alternate;
+            box-shadow: 0 0 10px 3px rgba(252, 211, 77, 0.8);
+            cursor: pointer;
+        }
+        @keyframes firefly-glow {
+            0% { opacity: 0.6; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 15px 5px rgba(252, 211, 77, 0.9); }
+        }
+        
+        /* 故事分頁樣式 */
+        .story-content-page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .story-content-page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .knowledge-box {
+            background-color: #FDFDFD;
+            border: 1px solid #D1D1D1;
+            border-left: 4px solid #e26a1f;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 16px;
+            box-shadow: 2px 2px 0px rgba(209,209,209,0.5);
+        }
+
+        /* 3D 翻卡核心樣式 */
+        .flip-container {
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flip-front, .flip-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            top: 0; left: 0;
+        }
+        .flip-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+
+<!-- 自訂提示框 -->
+<div id="custom-alert"><i data-lucide="bell" class="w-4 h-4"></i> <span id="custom-alert-msg"></span></div>
+
+<div id="app-container">
+    <!-- Top Global Nav -->
+    <div class="top-nav">
+        <div class="nav-icon-btn" onclick="navTo('page-static-map')" title="平溪地圖">
+            <i data-lucide="map" class="w-5 h-5 stroke-[1.5]"></i>
+        </div>
+        <div class="nav-icon-btn" onclick="navTo('page-encyclopedia')" title="植物圖鑑">
+            <i data-lucide="book-open" class="w-5 h-5 stroke-[1.5]"></i>
+        </div>
+        <div class="nav-icon-btn" onclick="navTo('page-team')" title="團隊介紹">
+            <i data-lucide="users" class="w-5 h-5 stroke-[1.5]"></i>
+        </div>
+    </div>
+
+    <!-- Page 1: Home/Cover -->
+    <div id="page-home" class="page active-page flex flex-col justify-between">
+        <div class="mt-16 text-center">
+            <p class="sub-narrative">生活的過程很累，邀請你來</p>
+            
+            <div class="mx-auto my-4 max-w-[280px] flex justify-center">
+                <img src="./images/logo.png" alt="菁森呼溪 LOGO" onerror="this.src='https://placehold.co/280x100?text=LOGO'" class="w-full h-auto object-contain">
+            </div>
+
+            <p class="text-[10px] font-bold text-[#2B2D2F]/60 tracking-[0.2em] mb-4 uppercase">
+                (JINGTONG)(PINGXI) TRAVEL COMPANION
+            </p>
+            <p class="sub-narrative mt-4">走進礦道與山林，聽見內心的聲音。</p>
+        </div>
+        
+        <div class="mb-24 flex flex-col items-center">
+            <div class="w-full max-w-[340px] rounded-2xl overflow-hidden border border-[#D1D1D1] shadow-sm mb-6 bg-[#FDFDFD]">
+                <img src="./images/area-map.png" alt="菁桐平溪區域地圖" onerror="this.src='https://placehold.co/340x220?text=Area+Map'" class="w-full h-auto object-cover">
+            </div>
+            <button onclick="navTo('page-privacy')" class="btn-primary">進入體驗</button>
+        </div>
+    </div>
+
+    <!-- Page: Team Intro -->
+    <div id="page-team" class="page hidden-page">
+        <div class="back-btn" onclick="navTo('page-home')">←</div>
+        <h2 class="text-2xl font-bold text-[#2B2D2F] mt-16 mb-6">研究團隊介紹</h2>
+        <div class="card-crayon mb-6">
+            <p class="text-sm leading-relaxed text-[#2B2D2F]/80">
+                四位來自淡江大學教育與未來設計學系的學生，將「平溪菁桐」這片生態與礦業歷史交織的土地，轉化為「情緒自我覺察」的示範基地。
+            </p>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-[15px] font-bold text-[#e26a1f] mb-4 px-1">計畫核心價值</h3>
+            <div class="px-1 mb-6">
+                <p class="text-[13px] leading-relaxed text-[#2B2D2F]/60">
+                    我們邀請參與者走入翠綠森林與歷史遺跡，在我們的引導下進行深度的自我對話。這是一場融合「療癒學習」的旅程，讓旅人在重新找回身心安頓節奏的同時，也喚醒對永續發展的行動力，重塑人與土地的深刻連結。
+                </p>
+            </div>
+            <div class="flex flex-col gap-5 pb-12">
+                <div class="bg-[#FDFDFD] border border-[#D1D1D1] rounded-2xl p-6 shadow-[3px_3px_0px_#D1D1D1] shrink-0 w-full box-border">
+                    <i data-lucide="leaf" class="w-8 h-8 text-[#e26a1f] mb-4 stroke-[1.5]"></i>
+                    <h4 class="font-bold text-[15px] text-[#2B2D2F] mb-3">植物情緒小卡</h4>
+                    <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-2">透過在地植物卡的蒐集與解鎖，將植物的生存特性轉譯為情緒隱喻。</p>
+                    <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed">引導使用者在自然中理解自身狀態，建立內在覺察能力。</p>
+                </div>
+                <div class="bg-[#FDFDFD] border border-[#D1D1D1] rounded-2xl p-6 shadow-[3px_3px_0px_#D1D1D1] shrink-0 w-full box-border">
+                    <i data-lucide="bot" class="w-8 h-8 text-[#e26a1f] mb-4 stroke-[1.5]"></i>
+                    <h4 class="font-bold text-[15px] text-[#2B2D2F] mb-3">聊天機器人</h4>
+                    <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-2">獨旅陪伴者，提供低技術門檻但高心靈參與的虛實整合機構。</p>
+                </div>
+                <div class="bg-[#FDFDFD] border border-[#D1D1D1] rounded-2xl p-6 shadow-[3px_3px_0px_#D1D1D1] shrink-0 w-full box-border">
+                    <i data-lucide="landmark" class="w-8 h-8 text-[#e26a1f] mb-4 stroke-[1.5]"></i>
+                    <h4 class="font-bold text-[15px] text-[#2B2D2F] mb-3">文化保存</h4>
+                    <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-2">透過情境敘事導覽，將礦工的生命歷程轉化為個體面對困境時的內在覺察。</p>
+                </div>
+            </div>
+        </div>
+        <div class="h-28 w-full shrink-0"></div>
+    </div>
+
+    <!-- Page: Plant Encyclopedia -->
+    <div id="page-encyclopedia" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-home')">←</div>
+        <h2 class="text-2xl font-bold text-[#2B2D2F] mt-16 mb-4">植物圖鑑</h2>
+        <p class="text-xs text-[#2B2D2F]/60 mb-6">平溪菁桐特色植物與生存哲學</p>
+        <div id="encyclopedia-list" class="space-y-4 flex-grow"></div>
+        <div class="h-28 w-full shrink-0"></div>
+    </div>
+
+    <!-- Page: Static Map -->
+    <div id="page-static-map" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-home')">←</div>
+        <h2 class="text-2xl font-bold text-[#2B2D2F] mt-16 mb-4">導覽地圖</h2>
+        <p class="text-xs text-[#2B2D2F]/60 mb-6">平溪菁桐周邊探索路線</p>
+        
+        <div class="w-full rounded-2xl overflow-hidden border border-[#D1D1D1] shadow-sm mb-24 bg-[#FDFDFD]">
+            <img src="./images/overall-map.png" alt="平溪菁桐整體導覽地圖" onerror="this.src='https://placehold.co/400x500?text=Overall+Map'" class="w-full h-auto">
+        </div>
+    </div>
+
+    <!-- Page: Privacy Statement -->
+    <div id="page-privacy" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-home')">←</div>
+        <h2 class="text-xl font-bold text-[#e26a1f] mb-6 mt-12 text-center tracking-[2px]">隱私與資料聲明</h2>
+        
+        <div class="flex-grow flex flex-col justify-center mb-8">
+            <div class="bg-[#FDFDFD] border border-[#D1D1D1] rounded-2xl p-6 shadow-[3px_3px_0px_#D1D1D1]">
+                <i data-lucide="shield-check" class="w-8 h-8 text-[#e26a1f] mb-5 stroke-[1.5]"></i>
+                <div class="space-y-4 text-[13.5px] text-[#2B2D2F]/80 leading-[1.8em] text-justify font-medium">
+                    <p>本網站重視您的個人隱私與資料安全，在您使用本網頁進行體驗的過程中，所有互動內容（包含情緒選擇、對話紀錄等），皆僅用於當下體驗，不會被儲存、記錄或蒐集。</p>
+                    <p>您在網站中的操作與輸入內容，不會被我們留存，也不會用於任何分析、追蹤或其他用途，請您安心使用。</p>
+                    <p>僅有在您自願填寫之「前測與後測問卷」中所提供的資料，將作為本專題研究之統計與分析使用，該資料僅用於整體趨勢之參考，不涉及個人身分識別，亦不會對外公開個別內容。</p>
+                    <p>本網站不會將任何資料提供給第三方，也不會進行個人資料之商業使用。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full pb-8 mt-auto shrink-0 pt-6">
+            <button onclick="navTo('page-pretest')" class="btn-primary">同意並繼續</button>
+        </div>
+    </div>
+
+    <!-- Page 1.2: Pre-test Questionnaire -->
+    <div id="page-pretest" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-privacy')">←</div>
+        <h2 class="text-xl font-bold text-[#e26a1f] mb-6 mt-12 text-center tracking-[2px]">啟程前的對話</h2>
+
+        <div class="flex-grow flex flex-col justify-center mb-8">
+            <div class="bg-[#FDFDFD] border border-[#D1D1D1] rounded-2xl p-6 shadow-[3px_3px_0px_#D1D1D1] flex flex-col items-center text-center">
+                <i data-lucide="clipboard-edit" class="w-10 h-10 text-[#e26a1f] mb-5 stroke-[1.5]"></i>
+                <p class="text-[14px] text-[#2B2D2F]/80 leading-[1.8em] font-medium mb-6">
+                    在踏上這趟心靈旅程之前，<br>邀請您花幾分鐘填寫這份簡短的問卷。<br>這將幫助我們了解您此刻的狀態。
+                </p>
+                <button onclick="window.open('https://docs.google.com/forms/d/1f2R0qlcpReGd7mLUEqQWdIyncT19BELLR1jd0FMxVRo/edit?usp=drivesdk', '_blank')" class="w-full py-[12px] rounded-[30px] border border-[#e26a1f] text-[#e26a1f] font-bold flex items-center justify-center gap-2 tracking-[2px] transition-all active:bg-[#e26a1f] active:text-[#FDFDFD] hover:bg-[#e26a1f]/5">
+                    <i data-lucide="external-link" class="w-4 h-4 stroke-[2]"></i> 填寫前測問卷
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full pb-8 mt-auto shrink-0 pt-6">
+            <button onclick="startQuiz()" class="btn-primary" style="margin-top: 0;">進入正題</button>
+        </div>
+    </div>
+
+    <!-- Page 1.6: Quiz Phase -->
+    <div id="page-quiz" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-pretest')">←</div>
+        
+        <div class="flex flex-col items-center mb-6 mt-8 shrink-0">
+            <i data-lucide="help-circle" class="w-10 h-10 text-[#2B2D2F] stroke-[1.5] mb-3"></i>
+            <h2 class="text-xl font-bold text-[#e26a1f] font-serif tracking-[4px]">你知道嗎？</h2>
+            <div class="w-8 h-[1px] bg-[#e26a1f] mt-4 opacity-50"></div>
+        </div>
+        <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-6 shrink-0 text-center px-4">
+            在正式進到平溪菁桐之前，先來測驗看看你對這裡的了解度有多少吧！<br>請根據直覺或所知回答，答案將在旅程最後揭曉。
+        </p>
+
+        <div id="quiz-container" class="flex-grow space-y-6"></div>
+        <div class="w-full pb-8 mt-auto shrink-0 pt-6"><button onclick="submitQuiz()" class="btn-primary">前往探索階段</button></div>
+    </div>
+
+    <!-- Page 2: Exploration -->
+    <div id="page-map" class="page hidden-page">
+        <div class="back-btn" onclick="navTo('page-quiz')">←</div>
+        <h2 class="text-xl font-bold text-[#e26a1f] mb-2 mt-12">探索階段</h2>
+        <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-6">
+            走進平溪菁桐之中，尋找那些被時間留下的情緒痕跡，每個地點，都藏著一段等待被看見的心情。
+        </p>
+        <div class="relative w-full h-40 bg-[#FDFDFD] rounded-2xl overflow-hidden border border-[#D1D1D1] mb-6 shadow-inner">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')] opacity-10 mix-blend-multiply"></div>
+            <div class="absolute top-[20%] left-[30%] location-dot" onclick="scrollToModule('mod-xiaozi')"></div>
+            <div class="absolute top-[50%] left-[60%] location-dot" onclick="scrollToModule('mod-shelter')"></div>
+            <div class="absolute bottom-[20%] left-[40%] location-dot" onclick="scrollToModule('mod-bell')"></div>
+            <div class="absolute top-[70%] left-[20%] location-dot" onclick="scrollToModule('mod-mailbox')"></div>
+            <div class="absolute top-[40%] left-[15%] location-dot" onclick="scrollToModule('mod-coal')"></div>
+        </div>
+        <div class="space-y-6" id="exploration-list">
+            <div class="card-crayon" id="mod-xiaozi">
+                <div class="module-title"><i data-lucide="mountain" class="w-5 h-5 text-[#e26a1f] stroke-[2]"></i> 孝子山頂</div>
+                <p class="text-xs text-[#2B2D2F]/60 leading-relaxed mb-4">站上險峻的山巔，在微風中回望來時的路。每一次的攀爬，都是與勇氣的對話。</p>
+                <div class="flex gap-3">
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="openInteraction('xiaozi')"><i data-lucide="headphones" class="w-3 h-3 stroke-[2]"></i> 語音導覽</button>
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="window.open('https://maps.app.goo.gl/HVhhrHqaZMmiSuJa7', '_blank')"><i data-lucide="map-pin" class="w-3 h-3 stroke-[2]"></i> 探索地圖</button>
+                </div>
+            </div>
+            <div class="card-crayon" id="mod-shelter">
+                <div class="module-title"><i data-lucide="tent" class="w-5 h-5 text-[#e26a1f] stroke-[2]"></i> 防空洞</div>
+                <p class="text-xs text-[#2B2D2F]/60 leading-relaxed mb-4">走進深邃的坑道，隔絕外界的喧囂。思考在壓力之下，何處是你的避風港？</p>
+                <div class="flex gap-3">
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="openInteraction('shelter')"><i data-lucide="headphones" class="w-3 h-3 stroke-[2]"></i> 語音導覽</button>
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="window.open('https://maps.app.goo.gl/3QLV97NXJieqYgwEA', '_blank')"><i data-lucide="map-pin" class="w-3 h-3 stroke-[2]"></i> 探索地圖</button>
+                </div>
+            </div>
+            <div class="card-crayon" id="mod-bell">
+                <div class="module-title"><i data-lucide="bell" class="w-5 h-5 text-[#e26a1f] stroke-[2]"></i> 平安鐘</div>
+                <p class="text-xs text-[#2B2D2F]/60 leading-relaxed mb-4">鐘聲悠遠，穿透時空的層層迷霧。感受靈魂深處的安定與歸屬。</p>
+                <div class="flex gap-3">
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="openInteraction('bell')"><i data-lucide="headphones" class="w-3 h-3 stroke-[2]"></i> 語音導覽</button>
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="window.open('https://maps.app.goo.gl/EExk8Q5t8aURDC1u6', '_blank')"><i data-lucide="map-pin" class="w-3 h-3 stroke-[2]"></i> 探索地圖</button>
+                </div>
+            </div>
+            <div class="card-crayon" id="mod-mailbox">
+                <div class="module-title"><i data-lucide="mail" class="w-5 h-5 text-[#e26a1f] stroke-[2]"></i> 百年郵筒</div>
+                <p class="text-xs text-[#2B2D2F]/60 leading-relaxed mb-4">綠色郵筒承載過無數思念。現在，請將一段想對未來說的話，寄存在這時光的轉角。</p>
+                <div class="flex gap-3">
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="openInteraction('mailbox')"><i data-lucide="headphones" class="w-3 h-3 stroke-[2]"></i> 語音導覽</button>
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="window.open('https://maps.app.goo.gl/L5LdiaiQ8Cj1prPi7', '_blank')"><i data-lucide="map-pin" class="w-3 h-3 stroke-[2]"></i> 探索地圖</button>
+                </div>
+            </div>
+            <div class="card-crayon" id="mod-coal">
+                <div class="module-title"><i data-lucide="trees" class="w-5 h-5 text-[#e26a1f] stroke-[2]"></i> 煤礦紀念公園</div>
+                <p class="text-xs text-[#2B2D2F]/60 leading-relaxed mb-4">在洗選煤後的廢石堆裡，時間溫柔地長出了整片森林，觸摸那段沉睡百年的黑色繁華。</p>
+                <div class="flex gap-3">
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="openStorybook()"><i data-lucide="book-open" class="w-3 h-3 stroke-[2]"></i> 歷史故事</button>
+                    <button class="btn-secondary flex items-center justify-center gap-1" onclick="window.open('https://maps.app.goo.gl/2sRwWJxZ9sUP6zFV7', '_blank')"><i data-lucide="map-pin" class="w-3 h-3 stroke-[2]"></i> 探索地圖</button>
+                </div>
+            </div>
+            <div class="pt-4"><button onclick="navTo('page-reflect')" class="btn-primary">前往省思階段</button></div>
+        </div>
+        <div class="h-28 w-full shrink-0"></div>
+    </div>
+
+    <!-- Page 2.5: Interactive Location Media & Messages -->
+    <div id="page-interaction" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-map')">←</div>
+        
+        <div class="mt-12 flex items-center gap-3 mb-6 px-1">
+            <i id="interact-icon" data-lucide="mountain" class="w-7 h-7 text-[#e26a1f] stroke-[2]"></i>
+            <h2 id="interact-title" class="text-2xl font-bold text-[#2B2D2F] tracking-[2px]">地點名稱</h2>
+        </div>
+
+        <div class="card-crayon mb-8 flex flex-col items-center justify-center py-8 relative overflow-hidden bg-[#F9F9F9] min-h-[300px]">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')] opacity-5 mix-blend-multiply pointer-events-none"></div>
+            
+            <button onclick="playLocationMedia()" id="interact-play-btn" class="w-16 h-16 rounded-full bg-[#e26a1f] text-[#FDFDFD] flex items-center justify-center shadow-[0_4px_15px_rgba(226,106,31,0.3)] active:scale-95 transition-all duration-300 mb-4 relative z-10">
+                <i id="interact-media-icon" data-lucide="play" class="w-6 h-6 stroke-[2] ml-1"></i>
+            </button>
+            <p id="interact-media-text" class="text-sm font-bold text-[#2B2D2F]/80 tracking-[2px] z-10">點擊播放</p>
+            
+            <div id="subtitle-display" class="w-full max-w-[280px] min-h-[44px] mt-4 flex items-center justify-center text-center px-2 z-10 opacity-0 transition-opacity duration-300">
+                <p id="subtitle-text" class="text-[13.5px] font-medium text-[#2B2D2F] leading-relaxed tracking-wide bg-[#FDFDFD]/80 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-block border border-[#D1D1D1]/50"></p>
+            </div>
+
+            <div id="audio-player-container" class="w-full max-w-[280px] mt-4 flex flex-col items-center z-10 hidden">
+                <div id="audio-visualizer" class="flex h-12 items-center mb-2 w-full justify-center px-2"></div>
+                
+                <div class="w-full h-1.5 bg-[#D1D1D1] rounded-full relative" id="audio-progress-bg">
+                    <div class="progress-hitbox" onclick="seekAudio(event)" style="position: absolute; width: 100%; height: 20px; top: -10px; cursor: pointer; z-index: 10;"></div>
+                    <div id="audio-progress-bar" class="h-full bg-[#e26a1f] rounded-full w-0 relative pointer-events-none transition-all duration-100 ease-linear"></div>
+                    <div id="fireflies-container" class="absolute inset-0 pointer-events-none hidden"></div>
+                </div>
+                
+                <p id="interact-time-text" class="text-[12px] text-[#2B2D2F]/60 tracking-widest mt-3 hidden z-10 text-center font-medium">00:00 / 00:00</p>
+            </div>
+
+            <button id="collect-moment-btn" onclick="collectMoment()" class="hidden mt-6 px-5 py-2.5 bg-[#FDFDFD] text-[#e26a1f] border border-[#e26a1f] rounded-full text-[13px] font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-sm z-10 hover:bg-[#e26a1f] hover:text-[#FDFDFD]">
+                <i data-lucide="star" class="w-4 h-4 stroke-[2]"></i> 收藏這份感觸
+            </button>
+        </div>
+
+        <div id="collected-moments-section" class="hidden flex-col px-1 mb-8">
+            <h3 class="text-[16px] font-bold text-[#e26a1f] mb-3 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5 stroke-[2]"></i> 你的專屬共鳴
+            </h3>
+            <p id="collected-summary" class="text-[13px] text-[#2B2D2F]/60 mb-4 leading-relaxed bg-[#FDFDFD] border border-[#D1D1D1] p-3 rounded-xl hidden"></p>
+            <div id="collected-list" class="space-y-3"></div>
+            <div class="w-full h-[1px] bg-[#D1D1D1]/50 mt-6"></div>
+        </div>
+
+        <div class="flex-grow flex flex-col px-1">
+            <h3 class="text-[16px] font-bold text-[#e26a1f] mb-2 flex items-center gap-2">
+                <i data-lucide="message-square-quote" class="w-5 h-5 stroke-[2]"></i> 旅人樹洞
+            </h3>
+            <p class="text-[13px] text-[#2B2D2F]/60 mb-5 leading-relaxed">
+                聽完這段故事，你有什麼想說的嗎？寫下此刻的思緒，或與過往的旅人對話。
+            </p>
+
+            <div class="bg-[#FDFDFD] border border-[#D1D1D1] rounded-2xl p-4 shadow-sm mb-8 relative transition-all focus-within:border-[#e26a1f]">
+                <textarea id="interaction-message-input" rows="3" placeholder="寫下想留在這片山林的話..." class="w-full bg-transparent text-[14px] text-[#2B2D2F] focus:outline-none resize-none leading-[1.8em]"></textarea>
+                <div class="flex justify-end mt-2">
+                    <button onclick="submitInteractionMessage()" class="px-5 py-2 bg-[#e26a1f] text-[#FDFDFD] rounded-[20px] text-xs font-bold active:scale-95 transition-transform flex items-center gap-1.5 tracking-wider">
+                        <i data-lucide="pen-line" class="w-3.5 h-3.5 stroke-[2]"></i> 留下迴響
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full h-[1px] bg-[#D1D1D1]/50 mb-6"></div>
+
+            <div id="interaction-messages-list" class="flex flex-col gap-4 pb-20"></div>
+        </div>
+    </div>
+
+    <!-- Page: Storybook -->
+    <div id="page-storybook" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-map')">←</div>
+        
+        <div class="mt-12 flex items-center justify-center gap-2 mb-6">
+            <i data-lucide="book-open" class="w-6 h-6 text-[#e26a1f] stroke-[1.5]"></i>
+            <h2 class="text-xl font-bold text-[#e26a1f] tracking-[4px]">礦區記憶</h2>
+        </div>
+
+        <div class="flex-grow bg-[#FDFDFD] border border-[#D1D1D1] rounded-2xl p-6 shadow-sm overflow-y-auto mb-6 relative">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')] opacity-[0.03] mix-blend-multiply pointer-events-none"></div>
+            
+            <div id="story-pages-container" class="relative z-10 text-[#2B2D2F]">
+                <div class="story-content-page active" id="story-page-1">
+                    <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">序言</h3>
+                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
+                        <img src="./images/story-1.png" alt="序言配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+1'" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">這裡曾是台灣煤礦時代中一座被山與鐵道喚醒的小鎮。日治時期，隨著礦業開發與 1921 年平溪線鐵路的完工，煤炭得以穩定輸出，這裡逐漸成為平溪地區的重要礦業據點，由台陽礦業公司主導經營。街道、建築與生活節奏，都隨著礦業的繁榮而運轉，吸引了大量勞工匯聚。</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">戰後，礦業由政府接管並持續發展，平溪成為台灣重要的煤礦核心之一。然而，到了 1970 年代能源結構轉變，加上礦坑開採成本高、災害頻繁，煤礦產業逐漸走向衰退。國際煤炭進口取代了本地生產，使礦區在 1990 年代全面停採，最終由重光煤礦於 1997 至 1998 年間停產，為這段長達百年的礦業歷史劃下句點。</p>
+                    <p class="text-[14px] leading-[2em] text-justify font-medium">如今，這裡已從礦業重鎮轉型為承載記憶的山城。曾經深入地底的黑暗與勞動，轉化為地表之上的故事。</p>
+                </div>
+
+                <div class="story-content-page" id="story-page-2">
+                    <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">清晨：命是天的，有拚才有飯吃</h3>
+                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
+                        <img src="./images/story-2.png" alt="礦工生活配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+2'" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">清晨總是飄著毛毛雨。我吃完早餐，看著熟睡的小孩，隨即壓下牽掛走出家門。走到坑口，我交出「火牌仔」換取頭燈。老礦工常說：「入坑前，我們是活人；入坑後，命是天的。」</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">我們大多不是領月薪。負責挖坑道的「掘進工」按距離算錢；我是「採煤工」，工資取決於產出多少車煤炭。有拚才有飯吃。</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">為了防勾結虛報，每天入坑前，領班會隨機抽一組「炭牌仔」，掛在我們這班運出的礦車上，作為檢量室依質論件計酬的依據。</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">坑裡以「班」為單位，大家同心協力培養出兄弟情誼。而每座礦場至少要成立 1 個救護隊（每隊 6 至 7 人），隊員選拔體格健壯的年輕礦工。雖然是義務職、沒加薪，但當上救護隊對我們而言是種殊榮。</p>
+                    
+                    <div class="knowledge-box">
+                        <p class="text-[12px] font-bold text-[#e26a1f] mb-2 flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i> 小知識</p>
+                        <ul class="text-[13px] leading-relaxed space-y-3 text-justify text-[#2B2D2F]/80">
+                            <li><span class="font-bold text-[#2B2D2F]">火牌仔：</span>礦工進坑前，要交出這塊小木牌來換頭燈。這時牌子留在地面，代表人在地底工作。下班安全出坑後，把頭燈還回去、拿回自己的火牌仔，才算完成當天的工作。</li>
+                            <li><span class="font-bold text-[#2B2D2F]">炭牌仔：</span>牌子上有號碼，每天入坑前隨機發給各班領班。礦工把煤炭挖好、裝滿礦車後，就要掛上這塊牌子運出坑。檢查室看車上的牌子號碼，就知道是哪一組挖的，依據車數來算每個人當天的薪水。</li>
+                            <li><span class="font-bold text-[#2B2D2F]">礦場救護隊：</span>救護隊每半年固定訓練，需穿著防護服並佩戴救護器材。遇到普通的滑磐或運搬事故較易處理；但若遇到瓦斯爆炸，就極其危險。一般礦工配戴的「一氧化碳自救器」僅能自救，而救護隊員穿戴「氧氣呼吸器」，背著送氣管、檢知器與急救箱，是唯一能深入險境救人的一群。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="story-content-page" id="story-page-3">
+                    <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">坑內</h3>
+                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
+                        <img src="./images/story-3.png" alt="坑內配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+3'" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">礦坑內悶熱得像高達 40°C 的大烤箱。我全身只穿一條短褲，汗水混合著煤屑，在皮膚上流成黑色的溝壑。</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">四周不時傳來支撐坑道的「相思木」受壓發出的吱吱聲。俗話說：「相思木在嚎，人就要緊走。」 但兄弟間的互相照應，減輕了我的恐懼。在這裡，我們不談明天。</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">我握著劇烈震動、冰冷的鎬煤機，耳邊全是震耳欲聾的轟鳴，煤塵在微弱的光線中亂飛。有時，我得側身鑽進不到一公尺高的窄縫裡採煤，整個人像蝦子一樣蜷縮著。我總會苦中作樂地問身邊的兄弟：「看我這樣『躺著賺錢』，你羨慕嗎？」</p>
+                    
+                    <div class="knowledge-box">
+                        <p class="text-[12px] font-bold text-[#e26a1f] mb-2 flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i> 小知識</p>
+                        <p class="text-[13px] leading-relaxed text-justify text-[#2B2D2F]/80">
+                            <span class="font-bold text-[#2B2D2F]">鎬煤機：</span>挖煤炭的氣動鑽頭。一台的效率可以抵 2 到 3 個手工人力。礦坑內怕火花引發爆炸，絕對不能用電動工具。這台機器是用「壓縮空氣」驅動，安全不發熱，運作時溫度還會降到「結霜」。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="story-content-page" id="story-page-4">
+                    <h3 class="text-lg font-bold mb-4 border-b border-[#D1D1D1] pb-2">出坑與下班：今朝有酒今朝醉</h3>
+                    <div class="w-full rounded-xl overflow-hidden mb-4 border border-[#D1D1D1]">
+                        <img src="./images/story-4.png" alt="下班生活配圖" onerror="this.src='https://placehold.co/400x250?text=Story+Image+4'" class="w-full h-auto object-cover">
+                    </div>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">當做完工作，搭著台車爬出坑口，看見陽光的那一刻，我深深吸了一大口帶有泥土味的空氣。我還回工具，拿回我的火牌仔——太好了，今天也平安活著出來了。</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">下班後走街上，我買了幾瓶米酒，喜歡和礦場的兄弟們天天把酒言歡，感慨著坑裡的驚險。</p>
+                    <p class="text-[14px] leading-[2em] mb-4 text-justify">旁人或許會問：「你們這些礦工，賺得多也花得快，怎麼不為未來打算？」</p>
+                    <p class="text-[14px] leading-[2em] text-justify font-medium">我聽了只是笑笑：「未來？對一個每天要把命交給地底的人來說，『現在』就是全部。如果我今晚不把這口肉吃下去，萬一明天我回不來，又有什麼意義呢？」</p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between pb-8 shrink-0">
+            <button id="story-prev-btn" onclick="turnStoryPage(-1)" class="px-4 py-2 text-[#e26a1f] font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-opacity flex items-center gap-1">
+                <i data-lucide="chevron-left" class="w-4 h-4 stroke-[2]"></i> 上一頁
+            </button>
+            <div class="text-[12px] font-bold text-[#2B2D2F]/50 tracking-widest">
+                <span id="story-current-page">1</span> / 4
+            </div>
+            <button id="story-next-btn" onclick="turnStoryPage(1)" class="px-4 py-2 bg-[#e26a1f] text-[#FDFDFD] rounded-full font-bold transition-transform active:scale-95 flex items-center gap-1">
+                下一頁 <i data-lucide="chevron-right" class="w-4 h-4 stroke-[2]"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Page 3: Reflection -->
+    <div id="page-reflect" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-map')">←</div>
+        <h2 class="text-xl font-bold text-[#e26a1f] mb-2 mt-12 shrink-0">省思階段</h2>
+        <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-6 shrink-0">
+            在每一個停留的地方，記錄下你此刻的情緒色彩，這些簡單的標記，正帶領著你查看自己的內在。
+        </p>
+        <div id="reflection-forms" class="flex-grow space-y-6">
+            <div class="card-crayon">
+                <p class="font-bold text-sm mb-3 text-[#2B2D2F] flex items-center gap-1"><i data-lucide="mountain" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> 孝子山頂</p>
+                <div class="flex overflow-x-auto hide-scrollbar pb-1">
+                    <button class="tag" onclick="toggleTag(this, 'active')">成就</button>
+                    <button class="tag" onclick="toggleTag(this, 'passive')">壓力</button>
+                    <button class="tag" onclick="toggleTag(this, 'passive')">恐懼</button>
+                    <button class="tag" onclick="toggleTag(this, 'active')">啟發</button>
+                </div>
+            </div>
+            <div class="card-crayon">
+                <p class="font-bold text-sm mb-3 text-[#2B2D2F] flex items-center gap-1"><i data-lucide="tent" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> 防空洞</p>
+                <div class="flex overflow-x-auto hide-scrollbar pb-1">
+                    <button class="tag" onclick="toggleTag(this, 'neutral')">平靜</button>
+                    <button class="tag" onclick="toggleTag(this, 'passive')">低落</button>
+                    <button class="tag" onclick="toggleTag(this, 'passive')">壓抑</button>
+                    <button class="tag" onclick="toggleTag(this, 'active')">好奇</button>
+                </div>
+            </div>
+            <div class="card-crayon">
+                <p class="font-bold text-sm mb-3 text-[#2B2D2F] flex items-center gap-1"><i data-lucide="bell" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> 平安鐘</p>
+                <div class="flex overflow-x-auto hide-scrollbar pb-1">
+                    <button class="tag" onclick="toggleTag(this, 'neutral')">安定</button>
+                    <button class="tag" onclick="toggleTag(this, 'passive')">緊張</button>
+                    <button class="tag" onclick="toggleTag(this, 'active')">希望</button>
+                    <button class="tag" onclick="toggleTag(this, 'neutral')">歸屬</button>
+                </div>
+            </div>
+            <div class="card-crayon">
+                <p class="font-bold text-sm mb-3 text-[#2B2D2F] flex items-center gap-1"><i data-lucide="mail" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> 百年郵筒</p>
+                <div class="flex overflow-x-auto hide-scrollbar pb-1">
+                    <button class="tag" onclick="toggleTag(this, 'neutral')">懷舊</button>
+                    <button class="tag" onclick="toggleTag(this, 'neutral')">溫暖</button>
+                    <button class="tag" onclick="toggleTag(this, 'active')">期待</button>
+                    <button class="tag" onclick="toggleTag(this, 'active')">連結</button>
+                </div>
+            </div>
+            <div class="card-crayon">
+                <p class="font-bold text-sm mb-3 text-[#2B2D2F] flex items-center gap-1"><i data-lucide="trees" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> 煤礦紀念公園</p>
+                <div class="flex overflow-x-auto hide-scrollbar pb-1">
+                    <button class="tag" onclick="toggleTag(this, 'passive')">麻木</button>
+                    <button class="tag" onclick="toggleTag(this, 'passive')">消耗</button>
+                    <button class="tag" onclick="toggleTag(this, 'neutral')">祈禱</button>
+                    <button class="tag" onclick="toggleTag(this, 'active')">努力</button>
+                </div>
+            </div>
+            <div id="custom-module" class="border border-dashed border-[#e26a1f] bg-[#FDFDFD] p-4 rounded-2xl transition-all">
+                <p id="custom-loc-display" class="hidden font-bold text-sm mb-3 text-[#2B2D2F] flex items-center gap-1 cursor-pointer" onclick="editCustomLoc()">
+                    <i data-lucide="map-pin" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> <span id="custom-loc-text"></span>
+                </p>
+                <input type="text" id="custom-loc-name" placeholder="輸入自定義地點 (按 Enter 確認)" class="w-full text-sm font-bold border-b border-[#D1D1D1] mb-3 focus:outline-none focus:border-[#e26a1f] bg-transparent py-1" onkeypress="handleCustomLoc(event)" onblur="confirmCustomLoc()">
+                <div class="flex overflow-x-auto hide-scrollbar items-center gap-1 pb-1" id="custom-tags-container">
+                    <input type="text" id="custom-tag-input" placeholder="+ 輸入情緒 (按 Enter 確認)" class="custom-tag-input text-sm border-b border-[#D1D1D1] focus:outline-none focus:border-[#e26a1f] py-1 bg-transparent w-40" onkeypress="handleCustomTag(event)">
+                </div>
+            </div>
+        </div>
+        <div class="w-full pb-8 mt-auto shrink-0 pt-6"><button onclick="calculateResult()" class="btn-primary">生成心靈植跡</button></div>
+    </div>
+
+    <!-- Page 4: Result -->
+    <div id="page-result" class="page hidden-page">
+        <div class="back-btn" onclick="navTo('page-reflect')">←</div>
+        <h2 class="text-xl font-bold text-[#e26a1f] mb-2 mt-12 text-left">你的心靈植跡</h2>
+        <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-4 text-left">
+            根據你今日留下的情緒痕跡，這株植物，也許正悄悄映照著現在的你。
+        </p>
+        
+        <div class="card-crayon mb-8">
+            <p id="res-matching-reason" class="text-[13px] text-[#2B2D2F]/80 leading-[1.8em] text-left"></p>
+        </div>
+
+        <div class="w-full mt-6 flex gap-3 px-1 justify-center">
+            <div class="flex-1 max-w-[170px] aspect-[5/7] bg-[#FDFDFD] border border-[#D1D1D1] rounded-xl overflow-hidden shadow-[3px_3px_0px_#D1D1D1]">
+                <img id="res-card-front" src="" alt="植物卡正面" onerror="this.src='https://placehold.co/170x238?text=Front'" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 max-w-[170px] aspect-[5/7] bg-[#FDFDFD] border border-[#D1D1D1] rounded-xl overflow-hidden shadow-[3px_3px_0px_#D1D1D1]">
+                <img id="res-card-back" src="" alt="植物卡背面" onerror="this.src='https://placehold.co/170x238?text=Back'" class="w-full h-full object-cover">
+            </div>
+        </div>
+
+        <div class="mt-8 px-2">
+            <div class="bg-[#FDFDFD] p-6 rounded-2xl border border-[#D1D1D1] shadow-sm">
+                <p class="text-xs font-bold text-[#2B2D2F] mb-2 flex items-center gap-1"><i data-lucide="leaf" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> 生存哲學：</p>
+                <p id="res-full-desc" class="text-sm text-[#2B2D2F]/80 leading-relaxed"></p>
+            </div>
+        </div>
+
+        <button onclick="navTo('page-quiz-answers')" class="btn-primary mt-8">查看測驗解答</button>
+        <div class="h-28 w-full shrink-0"></div>
+    </div>
+
+    <!-- Page 4.5: Quiz Answers -->
+    <div id="page-quiz-answers" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-result')">←</div>
+        <h2 class="text-xl font-bold text-[#e26a1f] mb-4 mt-12 text-left shrink-0">對答案時間</h2>
+        <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-6 shrink-0">
+            還記得你在旅程一開始回答的問題嗎？現在來看看你答對了幾題，並了解背後的故事吧！
+        </p>
+        <div id="quiz-answers-container" class="flex-grow space-y-4 pb-8 overflow-y-auto"></div>
+        <div class="w-full pb-8 mt-auto shrink-0 pt-6">
+            <button onclick="navTo('page-bloom')" class="btn-primary">邁向舒展與綻放</button>
+        </div>
+    </div>
+
+    <!-- Page 5: Bloom -->
+    <div id="page-bloom" class="page hidden-page flex flex-col">
+        <div class="back-btn" onclick="navTo('page-quiz-answers')">←</div>
+        <h2 class="text-xl font-bold text-[#e26a1f] mb-4 mt-12 text-left shrink-0">舒展與綻放</h2>
+        <div class="mb-8 px-1 shrink-0">
+            <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed text-left">
+                你的平溪旅程暫告一段落，將今天所學的情緒學習帶回去吧！<br>就像山林間不斷舒展的綠意，你將不斷地透過覺察，成為更好的自己。
+            </p>
+        </div>
+        <div class="bg-[#FDFDFD] p-6 rounded-2xl border border-[#D1D1D1] shadow-[0_4px_15px_rgba(209,209,209,0.3)] shrink-0">
+            <p class="text-[15px] font-bold text-[#2B2D2F] mb-2 flex items-center gap-2">
+                <i data-lucide="sprout" class="w-5 h-5 stroke-[2] text-[#e26a1f]"></i> 成長宣告
+            </p>
+            <p class="text-xs text-[#2B2D2F]/60 mb-4 leading-relaxed">明天你將帶著哪一個小小的韌性舉動回到生活中？</p>
+            <textarea id="growth-declaration" rows="4" placeholder="在這裡寫下你的宣告..." class="w-full bg-[#FDFDFD] border border-[#D1D1D1] rounded-xl p-4 text-sm text-[#2B2D2F] focus:outline-none focus:border-[#e26a1f] resize-none"></textarea>
+        </div>
+        <div class="w-full pb-8 mt-auto flex flex-col gap-3 shrink-0 pt-8">
+            <button onclick="window.open('https://docs.google.com/forms/d/1f2R0qlcpReGd7mLUEqQWdIyncT19BELLR1jd0FMxVRo/edit?usp=drivesdk', '_blank')" class="w-full py-[12px] rounded-[30px] border border-[#e26a1f] text-[#e26a1f] font-bold flex items-center justify-center gap-2 tracking-[2px] transition-all active:bg-[#e26a1f] active:text-[#FDFDFD]">
+                <i data-lucide="file-edit" class="w-5 h-5 stroke-[2]"></i> 填寫回饋問卷
+            </button>
+            <button onclick="finishJourney()" class="btn-primary" style="margin-top: 0;">完成旅程</button>
+        </div>
+    </div>
+
+    <!-- AI Chatbot (FAB) -->
+    <div id="chat-window" class="absolute bottom-[100px] right-6 w-[calc(100vw-48px)] max-w-[310px] h-[380px] bg-[#FDFDFD] border border-[#D1D1D1] rounded-3xl shadow-[4px_4px_0px_#D1D1D1] flex flex-col z-[1000] transition-all duration-300 opacity-0 pointer-events-none translate-y-4 overflow-hidden">
+        <div class="px-5 py-4 border-b border-[#D1D1D1] flex justify-between items-center bg-[#FDFDFD]">
+            <span class="text-[13px] font-bold text-[#2B2D2F] flex items-center gap-2 tracking-[1px]"><i data-lucide="leaf" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> 菁森小幫手</span>
+            <button onclick="toggleChat()" class="text-[#D1D1D1] hover:text-[#e26a1f]"><i data-lucide="x" class="w-4 h-4 stroke-[2]"></i></button>
+        </div>
+        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 text-[13px] hide-scrollbar bg-[#FDFDFD]">
+            <div class="flex items-start gap-2">
+                <div class="w-7 h-7 rounded-full bg-[#FDFDFD] border border-[#D1D1D1] flex items-center justify-center flex-shrink-0 shadow-sm"><i data-lucide="message-circle-heart" class="w-3.5 h-3.5 text-[#e26a1f] stroke-[2]"></i></div>
+                <div class="bg-[#FDFDFD] p-3.5 rounded-2xl rounded-tl-sm border border-[#D1D1D1] shadow-sm text-[#2B2D2F] leading-relaxed tracking-wide">你好，我是你的專屬心靈嚮導。在這趟平溪旅程中，有任何感觸、疲憊或收穫，都可以隨時和我分享喔。</div>
+            </div>
+        </div>
+        <div class="p-3 border-t border-[#D1D1D1] bg-[#FDFDFD] flex gap-2 items-center">
+            <input type="text" id="chat-input" placeholder="寫下此時的情緒..." class="flex-1 bg-[#FDFDFD] border border-[#D1D1D1] rounded-full px-4 py-2.5 text-[13px] focus:outline-none focus:border-[#e26a1f]" onkeypress="handleChatEnter(event)">
+            <button onclick="sendChatMessage()" class="w-9 h-9 bg-[#e26a1f] text-white rounded-full flex items-center justify-center flex-shrink-0 active:scale-90"><i data-lucide="send" class="w-4 h-4 stroke-[2] ml-1"></i></button>
+        </div>
+    </div>
+
+    <!-- Draggable FAB -->
+    <div id="chat-fab-wrapper" class="absolute bottom-[30px] right-6 z-[1000] touch-none">
+        <button id="chat-fab" class="w-14 h-14 bg-[#FDFDFD] border border-[#e26a1f] rounded-full flex items-center justify-center shadow-[2px_4px_10px_rgba(209,209,209,0.5)] active:scale-95 cursor-grab">
+            <i data-lucide="message-circle" class="w-6 h-6 text-[#e26a1f] stroke-[1.5] pointer-events-none"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    // --- Global Helpers ---
+    function showCustomAlert(msg) {
+        const alertBox = document.getElementById('custom-alert');
+        document.getElementById('custom-alert-msg').innerText = msg;
+        alertBox.classList.add('show');
+        setTimeout(() => alertBox.classList.remove('show'), 3000);
+    }
+
+    const plants = [
+        { name: '大葉仙茅', latin: 'Curculigo capitulata', icon: 'leaf', philosophy: '不被看見也能撐起一切。用最寬廣的身軀包裹住生活的重量。', tags: ['歸屬', '安定', '溫暖'], type: 'neutral' },
+        { name: '申跋', latin: 'Arisaema ringens', icon: 'sparkles', philosophy: '隨境而變，角色由我。豐沛時承擔重任，匱乏時收斂光芒。', tags: ['平靜', '釋然'], type: 'neutral' },
+        { name: '台灣山菊', latin: 'Farfugium japonicum var. formosanum', icon: 'sun', philosophy: '困境是為了淬鍊無可取代。寒冬非阻礙，而是韌性的證明。', tags: ['成就', '希望', '明亮'], type: 'active' },
+        { name: '苔原造景', latin: 'Moss landscape', icon: 'layers', philosophy: '真正的奢華不在於金錢堆砌，而是將平凡日常過成享受。', tags: ['溫暖', '明亮', '期待'], type: 'neutral' },
+        { name: '雙扇蕨', latin: 'Dipteris conjugata', icon: 'feather', philosophy: '即使看起來破碎，內在的生命編碼依然強大。', tags: ['懷舊', '啟發', '安定'], type: 'active' },
+        { name: '觀音坐蓮', latin: 'Angiopteris lygodiifolia', icon: 'droplet', philosophy: '懂得「斷捨離」以保全核心。學會放下包袱，才能存活。', tags: ['壓力', '壓抑', '釋然'], type: 'passive' },
+        { name: '水鴨腳', latin: 'Begonia formosana', icon: 'footprints', philosophy: '不需要長得完美對稱，能適應環境、發揮功能才是硬道理。', tags: ['努力', '好奇', '成就'], type: 'passive' },
+        { name: '蕨類', latin: 'Pteridophytes', icon: 'wind', philosophy: '不爭，故無所不容。在最陰暗的角落活出一片翠綠。', tags: ['平靜', '麻木', '消耗'], type: 'generalist' },
+        { name: '大菁', latin: 'Strobilanthes cusia', icon: 'flower', philosophy: '價值在於危難時的貢獻，平凡的外表下隱藏著療癒能量。', tags: ['祈禱', '低落', '安定'], type: 'neutral' },
+        { name: '艷紅鹿子百合', latin: 'Lilium speciosum var. gloriosoides', icon: 'flower-2', philosophy: '環境再險惡也要開出最華麗的花。在困境中保持自尊。', tags: ['恐懼', '期待', '希望'], type: 'active' },
+        { name: '板根植物', latin: 'Buttress roots trees', icon: 'tree-deciduous', philosophy: '腳下土地不深厚就橫向發展支撐力。斜槓與跨域的縮影。', tags: ['努力', '成就', '啟發'], type: 'active' }
+    ];
+
+    const quizBank = {
+        '礦業': [
+            { q: '故事中的小鎮是由哪一家知名的礦業公司主導經營的？', options: { A: '台灣電力公司', B: '台陽礦業公司', C: '臺灣鐵路局' }, ans: 'B' },
+            { q: '台灣本地的煤礦產業，最終在什麼時候全面停採，劃下百年歷史句點？', options: { A: '1950年代', B: '1970年代', C: '1990年代' }, ans: 'C' },
+            { q: '礦工在入坑前，必須交出什麼小木牌來換取照明燈，代表準備「入坑」？', options: { A: '炭牌仔', B: '火牌仔', C: '酒牌仔' }, ans: 'B' },
+            { q: '負責開挖坑道的工人叫「掘進工」，那負責在窄縫中把煤炭挖下來的工人叫什麼？', options: { A: '採煤工', B: '洗煤工', C: '運煤工' }, ans: 'A' },
+            { q: '為了防止虛報採煤數量，每天發給各領班、用來掛在礦車上紀錄產量的是什麼？', options: { A: '炭牌仔', B: '號碼布', C: '記分板' }, ans: 'A' },
+            { q: '一般礦工配戴的自救器只能自救，但救護隊員配戴哪種裝備，就可以深入險境去「救人」？', options: { A: '氧氣呼吸器', B: '潛水面罩', C: '防毒面具' }, ans: 'A' }
+        ],
+        '植物': [
+            { q: '藍染為當地有名的傳統染色工藝，請問他的原物料出自什麼植物？', options: { A: '大菁', B: '筆筒樹', C: '通泉草' }, ans: 'A' },
+            { q: '當你在野外口渴卻沒帶水時，什麼植物的莖可以用來救急？', options: { A: '龍船草', B: '水鴨腳', C: '苔癬' }, ans: 'B' },
+            { q: '有一種花被稱為峭壁上的精靈，同時他也是這裡的區花，請問他是？', options: { A: '台灣山菊', B: '申跋', C: '艷紅鹿子百合' }, ans: 'C' },
+            { q: '當地有一種特色美食，會用一種植物的葉子將鼠麴草跟糯米包起來，請問是哪種植物的葉子？', options: { A: '大葉仙茅', B: '雙扇蕨', C: '觀音坐蓮' }, ans: 'B' }
+        ],
+        '防空洞': [
+            { q: '日治時期二戰末期，當山頭鐘聲響起時，居民會迅速前往哪裡避難？', options: { A: '礦坑坑道', B: '防空洞', C: '郵局倉庫' }, ans: 'B' },
+            { q: '孩子們曾偷偷在防空洞裡做什麼事情，而被大人發現？', options: { A: '玩鬼抓人', B: '翹課睡覺', C: '烤地瓜' }, ans: 'C' }
+        ],
+        '平安鐘': [
+            { q: '戰爭年代中，這口鐘最初的用途是什麼？', options: { A: '祈禱平安', B: '避難警報', C: '報時提醒' }, ans: 'B' },
+            { q: '如今的鐘聲，被轉化成什麼樣的意義？', options: { A: '心願祈禱', B: '戰爭紀念', C: '報時提醒' }, ans: 'A' }
+        ],
+        '百年郵局': [
+            { q: '平溪郵局前的綠色郵筒，有什麼特別之處？', options: { A: '全台最大的郵筒', B: '現存歷史最悠久的郵筒', C: '是日本進口的木製郵筒' }, ans: 'B' },
+            { q: '故事中的居民小時候為了多看女同學一眼，特地做了什麼事？', options: { A: '練字寄信', B: '每天去圖書館借書', C: '和礦工叔叔聊天' }, ans: 'A' }
+        ]
+    };
+
+    let selectedQuizQuestions = [];
+    let userQuizAnswers = {};
+
+    let userSelections = { tags: [], customTags: [], hasActive: false };
+
+    function initEncyclopedia() {
+        const container = document.getElementById('encyclopedia-list');
+        container.innerHTML = '';
+        
+        plants.forEach((p, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card-crayon flex flex-col gap-3 transition-all duration-300';
+            
+            card.innerHTML = `
+                <div class="flex items-center justify-between cursor-pointer" onclick="toggleEncyclopediaCard(${idx})">
+                    <div class="flex items-center gap-4">
+                        <div class="text-[#e26a1f]"><i data-lucide="${p.icon}" class="w-7 h-7 stroke-[1.5]"></i></div>
+                        <div>
+                            <h3 class="font-bold text-[#2B2D2F] text-[15px]">${p.name}</h3>
+                            <p class="text-[11px] text-[#2B2D2F]/50 italic">${p.latin}</p>
+                        </div>
+                    </div>
+                    <div class="text-[#2B2D2F]/40 transition-transform duration-300" id="arrow-${idx}">
+                        <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                
+                <div id="card-holder-${idx}" class="hidden w-full flex justify-center pt-2 pb-4">
+                    <div class="flip-container w-[240px] h-[340px]" onclick="rotateEncyclopediaCard(this, event)">
+                        <div class="flip-inner w-full h-full rounded-2xl shadow-md border border-[#D1D1D1]">
+                            <div class="flip-front rounded-2xl overflow-hidden bg-white">
+                                <img src="./images/plants/${p.name}_front.png" alt="${p.name} 正面" onerror="this.src='https://placehold.co/240x340?text=Front'" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flip-back rounded-2xl overflow-hidden bg-white">
+                                <img src="./images/plants/${p.name}_back.png" alt="${p.name} 背面" onerror="this.src='https://placehold.co/240x340?text=Back'" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+
+    function toggleEncyclopediaCard(idx) {
+        const holder = document.getElementById(`card-holder-${idx}`);
+        const arrow = document.getElementById(`arrow-${idx}`);
+        if(holder.classList.contains('hidden')) {
+            holder.classList.remove('hidden');
+            arrow.style.transform = 'rotate(180deg)';
+        } else {
+            holder.classList.add('hidden');
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    function rotateEncyclopediaCard(el, event) {
+        event.stopPropagation();
+        const inner = el.querySelector('.flip-inner');
+        inner.classList.toggle('is-flipped');
+    }
+
+    function navTo(pageId) {
+        document.querySelectorAll('.page').forEach(p => { p.classList.add('hidden-page'); p.classList.remove('active-page'); });
+        const target = document.getElementById(pageId);
+        target.classList.remove('hidden-page'); target.classList.add('active-page');
+        target.scrollTo(0, 0);
+        if(mediaPlaying) { playLocationMedia(); }
+    }
+
+    function startQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        selectedQuizQuestions = [];
+        userQuizAnswers = {};
+
+        const categories = Object.keys(quizBank);
+        const icons = { '礦業': 'pickaxe', '植物': 'leaf', '防空洞': 'tent', '平安鐘': 'bell', '百年郵局': 'mail' };
+
+        categories.forEach((cat, index) => {
+            const questions = quizBank[cat];
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            const selectedQ = questions[randomIndex];
+            selectedQuizQuestions.push({ category: cat, ...selectedQ });
+
+            const qCard = document.createElement('div');
+            qCard.className = 'card-crayon';
+            qCard.innerHTML = `
+                <p class="font-bold text-sm mb-3 text-[#2B2D2F] flex items-center gap-2">
+                    <i data-lucide="${icons[cat]}" class="w-4 h-4 stroke-[2] text-[#e26a1f]"></i> ${cat}
+                </p>
+                <p class="text-xs text-[#2B2D2F]/80 leading-relaxed mb-4">${selectedQ.q}</p>
+                <div class="flex flex-col gap-2">
+                    ${Object.entries(selectedQ.options).map(([key, value]) => `
+                        <button class="w-full text-left px-4 py-2 border border-[#D1D1D1] rounded-xl text-sm text-[#2B2D2F]/80 hover:bg-[#e26a1f]/5 transition-colors focus:outline-none focus:bg-[#e26a1f]/10 focus:border-[#e26a1f]" onclick="selectQuizAnswer(this, ${index}, '${key}')">
+                            <span class="font-bold text-[#e26a1f] mr-2">${key}.</span> ${value}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(qCard);
+        });
+        lucide.createIcons();
+        navTo('page-quiz');
+    }
+
+    function selectQuizAnswer(btn, questionIndex, selectedKey) {
+        const parent = btn.parentElement;
+        Array.from(parent.children).forEach(child => {
+            child.classList.remove('bg-[#e26a1f]', 'text-[#FDFDFD]', 'border-[#e26a1f]');
+            child.classList.add('border-[#D1D1D1]', 'text-[#2B2D2F]/80');
+            const letterSpan = child.querySelector('span');
+            letterSpan.classList.remove('text-[#FDFDFD]');
+            letterSpan.classList.add('text-[#e26a1f]');
+        });
+
+        btn.classList.remove('border-[#D1D1D1]', 'text-[#2B2D2F]/80');
+        btn.classList.add('bg-[#e26a1f]', 'text-[#FDFDFD]', 'border-[#e26a1f]');
+        const activeLetterSpan = btn.querySelector('span');
+        activeLetterSpan.classList.remove('text-[#e26a1f]');
+        activeLetterSpan.classList.add('text-[#FDFDFD]');
+
+        userQuizAnswers[questionIndex] = selectedKey;
+    }
+
+    function submitQuiz() {
+        if (Object.keys(userQuizAnswers).length < selectedQuizQuestions.length) {
+            showCustomAlert('請回答所有問題後再繼續哦。');
+            return;
+        }
+        navTo('page-map');
+    }
+
+    function renderQuizAnswers() {
+        const container = document.getElementById('quiz-answers-container');
+        container.innerHTML = '';
+        let correctCount = 0;
+
+        selectedQuizQuestions.forEach((qData, index) => {
+            const userAns = userQuizAnswers[index];
+            const isCorrect = userAns === qData.ans;
+            if(isCorrect) correctCount++;
+
+            const ansCard = document.createElement('div');
+            ansCard.className = `p-4 rounded-xl border ${isCorrect ? 'bg-[#FDFDFD] border-[#e26a1f]/30 shadow-sm' : 'bg-[#F9F9F9] border-[#D1D1D1]'} relative`;
+            
+            const iconHTML = isCorrect
+                ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-green-600 absolute top-4 right-4 stroke-[2]"></i>`
+                : `<i data-lucide="x-circle" class="w-5 h-5 text-[#e26a1f] absolute top-4 right-4 stroke-[2]"></i>`;
+
+            ansCard.innerHTML = `
+                ${iconHTML}
+                <p class="text-[10px] font-bold text-[#e26a1f] mb-1 tracking-wider">${qData.category}</p>
+                <p class="text-[13px] text-[#2B2D2F] leading-relaxed mb-3 pr-6">${qData.q}</p>
+                <div class="text-[12px] space-y-1">
+                    <p class="${isCorrect ? 'text-green-700 font-medium' : 'text-[#e26a1f] font-medium'} line-through opacity-70">
+                        ${!isCorrect ? `你的選擇: ${userAns}. ${qData.options[userAns]}` : ''}
+                    </p>
+                    <p class="text-[#2B2D2F]/90 font-bold flex items-center gap-1">
+                        正確答案: <span class="text-[#e26a1f]">${qData.ans}. ${qData.options[qData.ans]}</span>
+                    </p>
+                </div>
+            `;
+            container.appendChild(ansCard);
+        });
+
+        const summaryMsg = document.createElement('div');
+        summaryMsg.className = 'mb-6 text-center';
+        summaryMsg.innerHTML = `<p class="text-[15px] font-bold text-[#e26a1f]">你答對了 ${correctCount} / ${selectedQuizQuestions.length} 題！</p>
+                                <p class="text-[12px] text-[#2B2D2F]/60 mt-1">希望這趟旅程有讓你更認識平溪菁桐。</p>`;
+        container.insertBefore(summaryMsg, container.firstChild);
+        lucide.createIcons();
+    }
+
+
+    function scrollToModule(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+
+    function toggleTag(el, type) {
+        el.classList.toggle('selected');
+        const tagName = el.innerText;
+        if(el.classList.contains('selected')) {
+            userSelections.tags.push({name: tagName, type: type});
+            if(type === 'active') userSelections.hasActive = true;
+        } else {
+            userSelections.tags = userSelections.tags.filter(t => t.name !== tagName);
+            userSelections.hasActive = userSelections.tags.some(t => t.type === 'active');
+        }
+    }
+
+    function handleCustomLoc(e) { if (e.key === 'Enter') { e.preventDefault(); confirmCustomLoc(); } }
+    function confirmCustomLoc() {
+        const input = document.getElementById('custom-loc-name');
+        const val = input.value.trim();
+        if (val !== '') { document.getElementById('custom-loc-text').innerText = val; input.classList.add('hidden'); document.getElementById('custom-loc-display').classList.remove('hidden'); }
+    }
+    function editCustomLoc() { document.getElementById('custom-loc-display').classList.add('hidden'); const input = document.getElementById('custom-loc-name'); input.classList.remove('hidden'); input.focus(); }
+
+    function handleCustomTag(e) {
+        if (e.key === 'Enter' && e.target.value.trim() !== '') {
+            e.preventDefault();
+            const val = e.target.value.trim();
+            const tagBtn = document.createElement('button');
+            tagBtn.className = 'tag selected'; tagBtn.innerText = val;
+            tagBtn.onclick = () => { tagBtn.remove(); userSelections.customTags = userSelections.customTags.filter(t => t !== val); };
+            document.getElementById('custom-tags-container').insertBefore(tagBtn, e.target);
+            userSelections.customTags.push(val);
+            e.target.value = '';
+        }
+    }
+
+    function calculateResult() {
+        if (userSelections.tags.length === 0 && userSelections.customTags.length === 0) { showCustomAlert('請至少標記一個情緒喔。'); return; }
+        
+        let scores = plants.map(p => ({ ...p, score: 0 }));
+        const currentEmotions = [...userSelections.tags.map(t => t.name), ...userSelections.customTags];
+        const intensityEmotions = ['壓力', '壓抑', '恐懼', '消耗', '麻木', '低落'];
+
+        scores.forEach(plant => {
+            currentEmotions.forEach(emo => {
+                if(plant.tags.includes(emo)) {
+                    plant.score += 10;
+                }
+            });
+            const hasIntensityMatch = plant.tags.some(t => intensityEmotions.includes(t)) && currentEmotions.some(e => intensityEmotions.includes(e));
+            if(hasIntensityMatch) plant.score += 2;
+        });
+
+        const maxScore = Math.max(...scores.map(s => s.score));
+        let winner;
+        if(maxScore === 0) {
+            const hasNegative = currentEmotions.some(e => intensityEmotions.includes(e));
+            if(hasNegative) winner = plants.find(p => p.name === '蕨類' || p.name === '大菁');
+            else winner = plants.find(p => p.name === '台灣山菊' || p.name === '板根植物');
+        } else {
+            scores.sort((a, b) => b.score - a.score);
+            winner = scores[0];
+        }
+
+        const emoStr = currentEmotions.slice(0,3).join('、');
+        const plantEmoStr = winner.tags.join('、');
+        
+        const generatedText = `根據你在上一階段記錄的情緒『${emoStr}』，這些感受正勾勒出你內在最真實的輪廓。在生活的流轉中，情緒並非停滯的點，而是在不斷地「轉變」與「適應」中緩慢「累積」著。這是一段「醞釀」力量的深刻過程，讓心靈得以向外「延伸」，尋找更寬闊的生存可能。正如${winner.name}所象徵的「${plantEmoStr}」，它在山林間安靜生長，將周遭環境轉化為堅韌的智慧。或許你正在這場旅程中，重新聽見內心的回響。也許現在的你，已經準備好擁抱這份綠意。`;
+
+        document.getElementById('res-full-desc').innerText = winner.philosophy;
+        document.getElementById('res-matching-reason').innerText = generatedText;
+
+        document.getElementById('res-card-front').src = `./images/plants/${winner.name}_front.png`;
+        document.getElementById('res-card-back').src = `./images/plants/${winner.name}_back.png`;
+
+        navTo('page-result');
+        lucide.createIcons();
+        
+        renderQuizAnswers();
+    }
+
+    function finishJourney() {
+        const declaration = document.getElementById('growth-declaration').value.trim();
+        if(declaration !== '') showCustomAlert('宣告已收下！願這份來自山林的綠意伴你成長。');
+        document.getElementById('growth-declaration').value = '';
+        userSelections = { tags: [], customTags: [], hasActive: false };
+        document.querySelectorAll('.tag.selected').forEach(el => el.classList.remove('selected'));
+        document.getElementById('custom-loc-name').value = '';
+        document.getElementById('custom-loc-name').classList.remove('hidden');
+        document.getElementById('custom-loc-display').classList.add('hidden');
+        document.getElementById('custom-loc-text').innerText = '';
+        const customTagsContainer = document.getElementById('custom-tags-container');
+        Array.from(customTagsContainer.children).forEach(child => { if (child.tagName.toLowerCase() === 'button') child.remove(); });
+        navTo('page-home');
+    }
+
+    const locationInteractions = {
+        'xiaozi': {
+            title: '孝子山頂', icon: 'mountain', mediaType: 'real-audio', audioSrc: './audio/mountain.mp3', mediaText: '點擊播放語音導覽', simulatedDuration: 12,
+            messages: [
+                {text: '山頂的風好大，但把心裡的煩惱都吹散了。', time: '1小時前', isUser: false},
+                {text: '原來只要堅持一步一步走，我也可以站得這麼高。', time: '昨天', isUser: false}
+            ]
+        },
+        'shelter': {
+            title: '防空洞', icon: 'tent', mediaType: 'real-audio', audioSrc: './audio/hole.mp3', mediaText: '點擊播放語音導覽', simulatedDuration: 18,
+            messages: [
+                {text: '坑道裡黑黑的，但安靜得讓人覺得很安全。', time: '3小時前', isUser: false},
+                {text: '短暫逃離了外面的喧囂，終於能好好聽聽自己的呼吸聲。', time: '2天前', isUser: false}
+            ]
+        },
+        'bell': {
+            title: '平安鐘', icon: 'bell', mediaType: 'real-audio', audioSrc: './audio/bell.mp3', mediaText: '點擊播放語音導覽', simulatedDuration: 96,
+            messages: [
+                {text: '鐘聲迴盪在山谷裡，感覺心也被洗滌了一遍。', time: '剛剛', isUser: false},
+                {text: '願家人平安健康。', time: '12小時前', isUser: false}
+            ]
+        },
+        'mailbox': {
+            title: '百年郵筒', icon: 'mail', mediaType: 'real-audio', audioSrc: './audio/mail.mp3', mediaText: '點擊播放語音導覽', simulatedDuration: 20,
+            messages: [
+                {text: '寫給未來的自己：希望你已經不再為了別人的眼光而焦慮。', time: '昨天', isUser: false},
+                {text: '不知道從這裡寄出的信，都去了哪裡呢？', time: '3天前', isUser: false}
+            ]
+        }
+    };
+
+    const bellSubtitles = [
+        { start: 0, end: 4, text: "當您靠近這座鐘，請細看它的鐘架，" },
+        { start: 5, end: 10, text: "是以早年常見的生鐵與厚實鋼材打造，結構沉穩而樸實。" },
+        { start: 11, end: 21, text: "鐘身表面，因長年受山區濕氣侵蝕，覆蓋上一層深紅褐色的氧化痕跡，彷彿時間在其上慢慢沉積的印記。" },
+        { start: 22, end: 26, text: "在過去，這口鐘的聲音，並不象徵平靜。" },
+        { start: 27, end: 31, text: "日治時期戰爭年代，這裡會有站哨者駐守高處，遠望天際，" },
+        { start: 32, end: 36, text: "一旦察覺危險，便敲響鐘聲，作為空襲來臨的警報。" },
+        { start: 37, end: 41, text: "那一聲聲急促的鐘響，提醒著居民迅速躲入防空洞，" },
+        { start: 42, end: 46, text: "也敲進了人們對未知與不安的記憶之中。" },
+        { start: 47, end: 51, text: "而如今，當鐘聲再次響起，它已不再承載恐懼，" },
+        { start: 52, end: 56, text: "而是轉化為另一種意義—「一種向內的安放」。" },
+        { start: 57, end: 60, text: "你或許會發現，鐘聲在山谷間緩緩擴散，" },
+        { start: 61, end: 68, text: "從清晰到模糊，像是某種情緒慢慢被釋放、被接住，也慢慢安靜下來。" },
+        { start: 69, end: 77, text: "或許，在敲下鐘的那一刻，你可以為誰停留一下—「為你的家人、朋友，或是一直撐著的自己」。" },
+        { start: 78, end: 84, text: "當聲音離開鐘聲的瞬間，也試著讓那些無法說出口的願望，被輕輕地送出去。" },
+        { start: 85, end: 96, text: "那麼此刻，如果讓你為一個人敲響這口鐘，那會是誰？你又希望，把什麼樣的心意，交給這一聲鐘響帶走呢？" }
+    ];
+
+    let currentInteractionLoc = null;
+    let mediaPlaying = false;
+    let isRealAudio = false;
+    const interactAudio = new Audio();
+    let simulatedTimer = null;
+    let simulatedCurrentTime = 0;
+    let simulatedDuration = 15;
+    let currentCollectedMoments = [];
+
+    function formatTime(seconds) {
+        if(isNaN(seconds)) return "00:00";
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function getSubtitleByTime(seconds) {
+        for (let i = 0; i < bellSubtitles.length; i++) {
+            if (seconds >= bellSubtitles[i].start && seconds <= bellSubtitles[i].end) {
+                return bellSubtitles[i];
+            }
+        }
+        return null;
+    }
+
+    function updateProgress(current, total) {
+        if(isNaN(total) || total === 0) return;
+        const percent = (current / total) * 100;
+        document.getElementById('audio-progress-bar').style.width = `${percent}%`;
+        document.getElementById('interact-time-text').innerText = `${formatTime(current)} / ${formatTime(total)}`;
+
+        if (mediaPlaying) {
+            const subDisplay = document.getElementById('subtitle-display');
+            const subText = document.getElementById('subtitle-text');
+            
+            if (currentInteractionLoc === 'bell') {
+                const sub = getSubtitleByTime(current);
+                if (sub) {
+                    subText.innerText = sub.text;
+                    subDisplay.classList.remove('hidden');
+                    subDisplay.style.opacity = 1;
+                } else {
+                    subDisplay.style.opacity = 0;
+                }
+            } else {
+                subText.innerText = "聆聽著山林與時間的低語...";
+                subDisplay.classList.remove('hidden');
+                subDisplay.style.opacity = 1;
+            }
+        }
+    }
+
+    interactAudio.addEventListener('loadedmetadata', () => {
+        if(isRealAudio) {
+            document.getElementById('interact-time-text').innerText = `00:00 / ${formatTime(interactAudio.duration)}`;
+        }
+    });
+
+    interactAudio.addEventListener('timeupdate', () => {
+        if(isRealAudio && interactAudio.duration) {
+            updateProgress(interactAudio.currentTime, interactAudio.duration);
+        }
+    });
+
+    function endPlayback() {
+        pauseUI();
+        if(isRealAudio) {
+            interactAudio.currentTime = interactAudio.duration || 0;
+            updateProgress(interactAudio.duration, interactAudio.duration);
+        } else {
+            simulatedCurrentTime = simulatedDuration;
+            updateProgress(simulatedDuration, simulatedDuration);
+        }
+        
+        if(currentCollectedMoments.length > 0) {
+            document.getElementById('fireflies-container').classList.remove('hidden');
+            renderCollectedMoments();
+            showCustomAlert("✨ 導覽結束。看看你在音波上留下的螢火蟲軌跡吧！");
+        }
+    }
+    
+    interactAudio.addEventListener('ended', endPlayback);
+
+    function seekAudio(e) {
+        const total = isRealAudio ? interactAudio.duration : simulatedDuration;
+        if(!total) return;
+        const rect = e.target.closest('#audio-progress-bg').getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const percent = clickX / rect.width;
+        const targetTime = Math.max(0, Math.min(percent * total, total));
+        
+        if(isRealAudio) {
+            interactAudio.currentTime = targetTime;
+            updateProgress(targetTime, total);
+        } else {
+            simulatedCurrentTime = targetTime;
+            updateProgress(targetTime, total);
+        }
+    }
+
+    function generateVisualizer() {
+        const vis = document.getElementById('audio-visualizer');
+        vis.innerHTML = '';
+        const barCount = 45;
+        
+        for(let i=0; i<barCount; i++) {
+            const x = i / (barCount - 1) * Math.PI;
+            const envelope = Math.sin(x);
+            const baseH = 15 + envelope * 85;
+            
+            const delay = -(i * 0.08).toFixed(2);
+            const duration = 1.2 + (Math.random() * 0.4);
+
+            vis.innerHTML += `<div class="wave-bar" style="height: ${baseH}%; animation-duration: ${duration}s; animation-delay: ${delay}s;"></div>`;
+        }
+    }
+
+    function updateWaveAnimation(play) {
+        document.querySelectorAll('.wave-bar').forEach(bar => {
+            if(play) bar.classList.add('playing');
+            else bar.classList.remove('playing');
+        });
+    }
+
+    function openInteraction(locId) {
+        currentInteractionLoc = locId;
+        const data = locationInteractions[locId];
+        
+        interactAudio.pause();
+        interactAudio.currentTime = 0;
+        clearInterval(simulatedTimer);
+        simulatedCurrentTime = 0;
+        mediaPlaying = false;
+        
+        document.getElementById('interact-title').innerText = data.title;
+        document.getElementById('interact-icon').setAttribute('data-lucide', data.icon);
+        
+        document.getElementById('interact-media-text').innerText = data.mediaText;
+        document.getElementById('interact-media-icon').setAttribute('data-lucide', 'play');
+        const playBtn = document.getElementById('interact-play-btn');
+        playBtn.className = "w-16 h-16 rounded-full bg-[#e26a1f] text-[#FDFDFD] flex items-center justify-center shadow-[0_4px_15px_rgba(226,106,31,0.3)] active:scale-95 transition-all duration-300 mb-4 relative z-10";
+        
+        currentCollectedMoments = [];
+        document.getElementById('fireflies-container').innerHTML = '';
+        document.getElementById('fireflies-container').classList.add('hidden');
+        document.getElementById('collected-moments-section').classList.add('hidden');
+        document.getElementById('audio-progress-bar').style.width = '0%';
+        document.getElementById('subtitle-display').style.opacity = 0;
+        
+        generateVisualizer();
+        
+        const playerContainer = document.getElementById('audio-player-container');
+        const collectBtn = document.getElementById('collect-moment-btn');
+        const timeText = document.getElementById('interact-time-text');
+        
+        playerContainer.classList.remove('hidden');
+        collectBtn.classList.remove('hidden');
+        timeText.classList.remove('hidden');
+        
+        if(data.mediaType === 'real-audio') {
+            isRealAudio = true;
+            interactAudio.src = data.audioSrc;
+            interactAudio.load();
+            timeText.innerText = `00:00 / 載入中...`;
+        } else {
+            isRealAudio = false;
+            simulatedDuration = data.simulatedDuration || 15;
+            timeText.innerText = `00:00 / ${formatTime(simulatedDuration)}`;
+        }
+        
+        document.getElementById('interaction-message-input').value = '';
+        renderInteractionMessages();
+        
+        navTo('page-interaction');
+        lucide.createIcons();
+
+        setTimeout(() => {
+            if (!mediaPlaying) {
+                playLocationMedia();
+            }
+        }, 300);
+    }
+
+    let currentStoryPage = 1;
+    const totalStoryPages = 4;
+
+    function openStorybook() {
+        currentStoryPage = 1;
+        updateStoryUI();
+        navTo('page-storybook');
+        lucide.createIcons();
+    }
+
+    function turnStoryPage(direction) {
+        currentStoryPage += direction;
+        
+        if (currentStoryPage < 1) currentStoryPage = 1;
+        if (currentStoryPage > totalStoryPages) {
+            navTo('page-map');
+            return;
+        }
+        
+        updateStoryUI();
+    }
+
+    function updateStoryUI() {
+        document.getElementById('story-current-page').innerText = currentStoryPage;
+        
+        document.querySelectorAll('.story-content-page').forEach((page, index) => {
+            if (index + 1 === currentStoryPage) {
+                page.classList.add('active');
+            } else {
+                page.classList.remove('active');
+            }
+        });
+
+        const prevBtn = document.getElementById('story-prev-btn');
+        const nextBtn = document.getElementById('story-next-btn');
+
+        if (currentStoryPage === 1) {
+            prevBtn.disabled = true;
+        } else {
+            prevBtn.disabled = false;
+        }
+
+        if (currentStoryPage === totalStoryPages) {
+            nextBtn.innerHTML = '完成閱讀 <i data-lucide="check" class="w-4 h-4 stroke-[2]"></i>';
+        } else {
+            nextBtn.innerHTML = '下一頁 <i data-lucide="chevron-right" class="w-4 h-4 stroke-[2]"></i>';
+        }
+        
+        lucide.createIcons();
+        const container = document.querySelector('#page-storybook .overflow-y-auto');
+        if(container) container.scrollTop = 0;
+    }
+
+    function playLocationMedia() {
+        if(!currentInteractionLoc) return;
+        
+        mediaPlaying = !mediaPlaying;
+        const icon = document.getElementById('interact-media-icon');
+        const btn = document.getElementById('interact-play-btn');
+
+        if(mediaPlaying) {
+            document.getElementById('interact-media-text').innerText = "正在播放...";
+            icon.setAttribute('data-lucide', 'pause');
+            btn.className = "w-16 h-16 rounded-full bg-[#FDFDFD] text-[#e26a1f] border border-[#e26a1f] flex items-center justify-center shadow-[0_4px_15px_rgba(226,106,31,0.3)] active:scale-95 transition-all duration-300 mb-4 relative z-10";
+            updateWaveAnimation(true);
+            
+            updateProgress(isRealAudio ? interactAudio.currentTime : simulatedCurrentTime, isRealAudio ? interactAudio.duration : simulatedDuration);
+
+            if(isRealAudio) {
+                const playPromise = interactAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("自動播放被阻擋", error);
+                        pauseUI();
+                    });
+                }
+            } else {
+                if(simulatedCurrentTime >= simulatedDuration) simulatedCurrentTime = 0;
+                simulatedTimer = setInterval(() => {
+                    simulatedCurrentTime += 0.1;
+                    updateProgress(simulatedCurrentTime, simulatedDuration);
+                    if(simulatedCurrentTime >= simulatedDuration) endPlayback();
+                }, 100);
+            }
+        } else {
+            pauseUI();
+        }
+        lucide.createIcons();
+    }
+    
+    function pauseUI() {
+        mediaPlaying = false;
+        const data = locationInteractions[currentInteractionLoc];
+        document.getElementById('interact-media-text').innerText = data.mediaText;
+        const icon = document.getElementById('interact-media-icon');
+        icon.setAttribute('data-lucide', 'play');
+        const btn = document.getElementById('interact-play-btn');
+        btn.className = "w-16 h-16 rounded-full bg-[#e26a1f] text-[#FDFDFD] flex items-center justify-center shadow-[0_4px_15px_rgba(226,106,31,0.3)] active:scale-95 transition-all duration-300 mb-4 relative z-10";
+        updateWaveAnimation(false);
+        document.getElementById('subtitle-display').style.opacity = 0;
+        
+        if(isRealAudio) interactAudio.pause();
+        else clearInterval(simulatedTimer);
+    }
+
+    function collectMoment() {
+        const current = isRealAudio ? interactAudio.currentTime : simulatedCurrentTime;
+        const total = isRealAudio ? interactAudio.duration : simulatedDuration;
+
+        if(!total || current === 0) {
+            showCustomAlert("請先播放語音導覽喔！");
+            return;
+        }
+
+        const percent = (current / total) * 100;
+        const isDuplicate = currentCollectedMoments.some(m => Math.abs(m.time - current) < 2);
+        if(isDuplicate) {
+            showCustomAlert("這個瞬間已經被你捕捉囉！");
+            return;
+        }
+
+        let text = "這段語音中，觸動你心弦的片刻。";
+        if (currentInteractionLoc === 'bell') {
+            const sub = getSubtitleByTime(current);
+            if(sub) text = sub.text;
+        } else {
+             text = "山林裡的聲音，在此刻接住了你的情緒。";
+        }
+
+        currentCollectedMoments.push({
+            time: current,
+            timeStr: formatTime(current),
+            percent: percent,
+            text: text
+        });
+        currentCollectedMoments.sort((a, b) => a.time - b.time);
+
+        const container = document.getElementById('fireflies-container');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'firefly-wrapper';
+        wrapper.style.left = `${percent}%`;
+        wrapper.innerHTML = `<div class="firefly-dot" title="${formatTime(current)}"></div>`;
+        container.appendChild(wrapper);
+
+        showCustomAlert("✨ 已捕捉瞬間！螢火蟲將在導覽結束時浮現。");
+    }
+
+    function renderCollectedMoments() {
+        const section = document.getElementById('collected-moments-section');
+        const summaryText = document.getElementById('collected-summary');
+        const listDiv = document.getElementById('collected-list');
+        listDiv.innerHTML = '';
+
+        if(currentCollectedMoments.length === 0) return;
+
+        section.classList.remove('hidden');
+        summaryText.classList.remove('hidden');
+        const timeStrings = currentCollectedMoments.map(m => m.timeStr).join('、');
+        summaryText.innerText = `你在 ${timeStrings} 停留下來。這些觸動你的片段，也許正映照著你最近正在經歷的情緒。`;
+
+        currentCollectedMoments.forEach(moment => {
+            const item = document.createElement('div');
+            item.className = 'bg-[#F9F9F9] border border-[#D1D1D1] rounded-xl p-3 flex gap-3 items-start cursor-pointer hover:bg-[#FDFDFD] transition-colors shadow-sm active:scale-[0.98]';
+            item.onclick = () => replayMoment(moment.time);
+            item.innerHTML = `
+                <div class="flex-shrink-0 bg-[#e26a1f] text-[#FDFDFD] text-[10px] font-bold px-2 py-1 rounded border border-[#e26a1f] mt-0.5">
+                    ${moment.timeStr}
+                </div>
+                <div class="flex-grow min-w-0">
+                    <p class="text-[13px] text-[#2B2D2F] leading-relaxed break-words">${moment.text}</p>
+                </div>
+                <div class="flex-shrink-0 text-[#e26a1f] mt-1">
+                    <i data-lucide="play-circle" class="w-4 h-4 stroke-[1.5]"></i>
+                </div>
+            `;
+            listDiv.appendChild(item);
+        });
+        lucide.createIcons();
+    }
+
+    function replayMoment(seconds) {
+        if(isRealAudio) interactAudio.currentTime = seconds;
+        else simulatedCurrentTime = seconds;
+        
+        if(!mediaPlaying) {
+            playLocationMedia();
+        }
+    }
+
+    function renderInteractionMessages() {
+        const list = document.getElementById('interaction-messages-list');
+        const messages = locationInteractions[currentInteractionLoc].messages;
+        list.innerHTML = '';
+        
+        messages.forEach(msg => {
+            const bgClass = msg.isUser ? 'bg-[#FDFDFD]' : 'bg-[#F9F9F9]';
+            const borderClass = msg.isUser ? 'border-[#e26a1f]' : 'border-[#D1D1D1]';
+            list.innerHTML += `
+                <div class="${bgClass} border ${borderClass} rounded-2xl p-5 shadow-sm relative">
+                    <i data-lucide="quote" class="absolute top-4 right-4 w-5 h-5 text-[#D1D1D1]/60 stroke-[1.5]"></i>
+                    <p class="text-[14px] text-[#2B2D2F] leading-[1.8em] relative z-10 pr-6">${msg.text.replace(/\n/g, '<br>')}</p>
+                    <p class="text-[11px] text-[#2B2D2F]/50 mt-4 text-right tracking-wider">${msg.time}</p>
+                </div>
+            `;
+        });
+        lucide.createIcons();
+    }
+
+    function submitInteractionMessage() {
+        const input = document.getElementById('interaction-message-input');
+        const text = input.value.trim();
+        if(!text) {
+            showCustomAlert("請先寫下一些文字喔！");
+            return;
+        }
+        
+        locationInteractions[currentInteractionLoc].messages.unshift({
+            text: text,
+            time: '剛剛',
+            isUser: true
+        });
+        
+        input.value = '';
+        renderInteractionMessages();
+        showCustomAlert("你的迴響已留在這片山林中。");
+    }
+
+    /* --- Chatbot logic --- */
+    const apiKey = "";
+    const systemPrompt = `你是一個名為「菁森小幫手」的專屬心靈嚮導，陪伴旅人探索平溪菁桐。請用繁體中文 (zh-TW) 溫柔、充滿底片詩意與同理心的語氣回覆。
+請遵循以下對話結構：觀察(同理情緒) → 映照(引用1種植物哲學來安慰或引導) → 提問(提出一個輕柔的反思問題)。回覆請保持簡短（大約 80-120 字）。
+
+【平溪植物知識庫】(請根據使用者的情緒，自然地挑選 1 種植物來比喻)：
+1. 大葉仙茅：不被看見也能撐起一切，溫柔包裹生活的重量。適合：覺得自己不被重視、默默付出的人。
+2. 申跋：隨境而變，養分足開雌花，不足轉雄花。適合：感到角色轉換壓力、資源匱乏的人。
+3. 台灣山菊：深冬石縫開出暖黃花。困境是為淬鍊無可取代。適合：正在經歷低潮、需要韌性的人。
+4. 苔蘚：極強耐旱，缺水休眠，遇水復甦。適合：過度消耗、需要休眠與微小確幸的人。
+5. 雙扇蕨：歷經大滅絕的活化石。即使看起來破碎，內在生命依然強大。適合：經歷挫折、感到破碎的人。
+6. 觀音坐蓮：遇乾旱會自動掉葉保水。懂得「斷捨離」放下包袱才能存活。適合：壓力爆表、承擔過多的人。
+7. 水鴨腳：葉片不對稱以爭取最大受光。不需要完美對稱，能適應環境才是硬道理。適合：追求完美而焦慮、覺得自己有缺陷的人。
+8. 蕨類：不爭陽光，在陰暗角落活出翠綠。不爭，故無所不容。適合：厭倦競爭、渴望平靜的人。
+9. 大菁：平凡外表藏著療癒消炎能量。適合：覺得自己平凡、尋找自我價值的人。
+10. 艷紅鹿子百合：長在懸崖，環境再險惡也要開出華麗的花。適合：處於險境但仍想保持自尊與優雅的人。
+11. 板根植物：土地不深厚就橫向發展板根支撐。適合：覺得根基不穩、需要跨域尋求支撐的人。
+
+請記住，對話要自然，不要像在背書，而是像一位懂植物的老朋友在分享山林智慧。`;
+    
+    let chatHistory = [{ role: 'model', text: '你好，我是你的專屬心靈嚮導。在這趟平溪旅程中，有任何感觸、疲憊或收穫，都可以隨時和我分享喔。' }];
+
+    async function callGeminiAPI(history, systemInstructionText) {
+        if(!apiKey) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve("目前山裡的訊號不太好呢。不過沒關係，把這裡當作你的樹洞，靜靜寫下你的感受，山林都會聽見的。");
+                }, 1000);
+            });
+        }
+        
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+        const contents = history.map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
+        const payload = { contents, systemInstruction: { parts: [{ text: systemInstructionText }] } };
+        try {
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "對不起，我剛剛分心了。";
+        } catch (e) { return "抱歉，山裡訊號不好。"; }
+    }
+
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        if(win.classList.contains('opacity-0')) { win.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4'); document.getElementById('chat-input').focus(); }
+        else win.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim(); if(!text) return;
+        const msgDiv = document.getElementById('chat-messages');
+        msgDiv.innerHTML += `<div class="flex items-start gap-2 justify-end"><div class="bg-[#e26a1f] text-white p-3.5 rounded-2xl rounded-tr-sm shadow-sm leading-relaxed max-w-[80%]">${text}</div></div>`;
+        input.value = ''; msgDiv.scrollTop = msgDiv.scrollHeight;
+        chatHistory.push({ role: 'user', text });
+        
+        const loadingId = 'loading-' + Date.now();
+        msgDiv.innerHTML += `<div id="${loadingId}" class="flex items-start gap-2"><div class="w-7 h-7 rounded-full bg-[#FDFDFD] border border-[#D1D1D1] flex items-center justify-center flex-shrink-0 shadow-sm"><i data-lucide="more-horizontal" class="w-3.5 h-3.5 text-[#e26a1f] stroke-[2] animate-pulse"></i></div></div>`;
+        lucide.createIcons(); msgDiv.scrollTop = msgDiv.scrollHeight;
+
+        const reply = await callGeminiAPI(chatHistory, systemPrompt);
+        chatHistory.push({ role: 'model', text: reply });
+        
+        document.getElementById(loadingId).remove();
+        msgDiv.innerHTML += `<div class="flex items-start gap-2"><div class="w-7 h-7 rounded-full bg-[#FDFDFD] border border-[#D1D1D1] flex items-center justify-center flex-shrink-0 shadow-sm"><i data-lucide="message-circle-heart" class="w-3.5 h-3.5 text-[#e26a1f] stroke-[2]"></i></div><div class="bg-[#FDFDFD] p-3.5 rounded-2xl rounded-tl-sm border border-[#D1D1D1] shadow-sm text-[#2B2D2F] leading-relaxed max-w-[80%]">${reply.replace(/\n/g, '<br>')}</div></div>`;
+        lucide.createIcons(); msgDiv.scrollTop = msgDiv.scrollHeight;
+    }
+    function handleChatEnter(e) { if(e.key === 'Enter') sendChatMessage(); }
+
+    function initDraggableFab() {
+        const wrap = document.getElementById('chat-fab-wrapper'); const btn = document.getElementById('chat-fab'); const container = document.getElementById('app-container');
+        let isDragging = false, startX, startY, isClick = true, initialLeft, initialTop;
+        const startDrag = (e) => {
+            if (e.type === 'mousedown' && e.button !== 0) return;
+            const rect = wrap.getBoundingClientRect(); const cRect = container.getBoundingClientRect();
+            initialLeft = rect.left - cRect.left; initialTop = rect.top - cRect.top;
+            wrap.style.right = 'auto'; wrap.style.bottom = 'auto';
+            wrap.style.left = initialLeft + 'px'; wrap.style.top = initialTop + 'px';
+            let cX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            let cY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            startX = cX - initialLeft; startY = cY - initialTop; isDragging = true; isClick = true; btn.classList.add('cursor-grabbing');
+        };
+        const drag = (e) => {
+            if (!isDragging) return; e.preventDefault();
+            let cX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            let cY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            let nL = cX - startX, nT = cY - startY;
+            const mX = container.clientWidth - wrap.clientWidth, mY = container.clientHeight - wrap.clientHeight;
+            nL = Math.max(0, Math.min(nL, mX)); nT = Math.max(0, Math.min(nT, mY));
+            if (Math.abs(nL - initialLeft) > 3 || Math.abs(nT - initialTop) > 3) isClick = false;
+            wrap.style.left = nL + 'px'; wrap.style.top = nT + 'px';
+        };
+        const stopDrag = () => { if (!isDragging) return; isDragging = false; btn.classList.remove('cursor-grabbing'); };
+        wrap.addEventListener('mousedown', startDrag); wrap.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('mousemove', drag, { passive: false }); document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('mouseup', stopDrag); document.addEventListener('touchend', stopDrag);
+        btn.addEventListener('click', (e) => { if (isClick) toggleChat(); else e.preventDefault(); });
+    }
+
+    window.onload = () => { initEncyclopedia(); initDraggableFab(); lucide.createIcons(); };
+</script>
+
+</body>
+</html>
