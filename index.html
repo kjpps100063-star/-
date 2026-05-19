@@ -473,7 +473,7 @@
             <div class="w-8 h-[1px] bg-[#e26a1f] mt-4 opacity-50"></div>
         </div>
         <p class="text-[13px] text-[#2B2D2F]/80 leading-relaxed mb-6 shrink-0 text-center px-4">
-            在正式進到平溪菁桐之前，先來測驗看看你對這裡的了解度有多少吧！<br>請根據直覺或所知回答，答案將在旅程最後揭曉。
+            在正式進到平溪菁桐之前，先來測驗看看你對這裡的了解度有多少吧！<br>請根據直覺或所知回答，答案將解曉於旅程最後。
         </p>
 
         <div id="quiz-container" class="flex-grow space-y-6"></div>
@@ -1735,46 +1735,14 @@
         showCustomAlert("你的迴響已留在這片山林中。");
     }
 
-    /* --- Chatbot logic --- */
-    const apiKey = "";
-    const systemPrompt = `你是一個名為「菁森小幫手」的專屬心靈嚮導，陪伴旅人探索平溪菁桐。請用繁體中文 (zh-TW) 溫柔、充滿底片詩意與同理心的語氣回覆。
-請遵循以下對話結構：觀察(同理情緒) → 映照(引用1種植物哲學來安慰或引導) → 提問(提出一個輕柔的反思問題)。回覆請保持簡短（大約 80-120 字）。
-
-【平溪植物知識庫】(請根據使用者的情緒，自然地挑選 1 種植物來比喻)：
-1. 大葉仙茅：不被看見也能撐起一切，溫柔包裹生活的重量。適合：覺得自己不被重視、默默付出的人。
-2. 申跋：隨境而變，養分足開雌花，不足轉雄花。適合：感到角色轉換壓力、資源匱乏的人。
-3. 台灣山菊：深冬石縫開出暖黃花。困境是為淬鍊無可取代。適合：正在經歷低潮、需要韌性的人。
-4. 苔蘚：極強耐旱，缺水休眠，遇水復甦。適合：過度消耗、需要休眠與微小確幸的人。
-5. 雙扇蕨：歷經大滅絕的活化石。即使看起來破碎，內在生命依然強大。適合：經歷挫折、感到破碎的人。
-6. 觀音坐蓮：遇乾旱會自動掉葉保水。懂得「斷捨離」放下包袱才能存活。適合：壓力爆表、承擔過多的人。
-7. 水鴨腳：葉片不對稱以爭取最大受光。不需要完美對稱，能適應環境才是硬道理。適合：追求完美而焦慮、覺得自己有缺陷的人。
-8. 蕨類：不爭陽光，在陰暗角落活出翠綠。不爭，故無所不容。適合：厭倦競爭、渴望平靜的人。
-9. 大菁：平凡外表藏著療癒消炎能量。適合：覺得自己平凡、尋找自我價值的人。
-10. 艷紅鹿子百合：長在懸崖，環境再險惡也要開出華麗的花。適合：處於險境但仍想保持自尊與優雅的人。
-11. 板根植物：土地不深厚就橫向發展板根支撐。適合：覺得根基不穩、需要跨域尋求支撐的人。
-
-請記住，對話要自然，不要像在背書，而是像一位懂植物的老朋友在分享山林智慧。`;
-    
-    let chatHistory = [{ role: 'model', text: '你好，我是你的專屬心靈嚮導。在這趟平溪旅程中，有任何感觸、疲憊或收穫，都可以隨時和我分享喔。' }];
-
-    async function callGeminiAPI(history, systemInstructionText) {
-        if(!apiKey) {
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    resolve("目前山裡的訊號不太好呢。不過沒關係，把這裡當作你的樹洞，靜靜寫下你的感受，山林都會聽見的。");
-                }, 1000);
-            });
-        }
-        
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-        const contents = history.map(msg => ({ role: msg.role, parts: [{ text: msg.text }] }));
-        const payload = { contents, systemInstruction: { parts: [{ text: systemInstructionText }] } };
-        try {
-            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "對不起，我剛剛分心了。";
-        } catch (e) { return "抱歉，山裡訊號不好。"; }
-    }
+    // 建立一個隨機萬用回覆的陣列
+    const fallbackReplies = [
+        "我收到了你的這份思緒。在這片被山林包圍的菁桐，你可以安心地做自己。這股綠意，正輕柔地接住你。",
+        "生活有時像礦坑一樣悶熱，但只要走出來，就有陽光。這段話，就當作我們之間在山林裡的秘密吧。",
+        "謝謝你願意在這裡分享。就像苔蘚在缺水時會休眠一樣，也許現在的你也需要一點屬於自己的微小確幸和休息。",
+        "聽見你的心聲了。你知道嗎？申跋在資源匱乏時會收斂光芒，這不是退縮，而是一種生存的智慧。現在的你，慢慢來就好。",
+        "平溪的風會把這些話帶走的。不論好壞，都是這趟旅程中真實的你。深呼吸，有稍微感覺肩膀輕一點了嗎？"
+    ];
 
     function toggleChat() {
         const win = document.getElementById('chat-window');
@@ -1784,23 +1752,60 @@
 
     async function sendChatMessage() {
         const input = document.getElementById('chat-input');
-        const text = input.value.trim(); if(!text) return;
+        const text = input.value.trim(); 
+        if(!text) return;
         const msgDiv = document.getElementById('chat-messages');
-        msgDiv.innerHTML += `<div class="flex items-start gap-2 justify-end"><div class="bg-[#e26a1f] text-white p-3.5 rounded-2xl rounded-tr-sm shadow-sm leading-relaxed max-w-[80%]">${text}</div></div>`;
-        input.value = ''; msgDiv.scrollTop = msgDiv.scrollHeight;
-        chatHistory.push({ role: 'user', text });
         
+        // 1. 顯示使用者說的話
+        msgDiv.innerHTML += `<div class="flex items-start gap-2 justify-end"><div class="bg-[#e26a1f] text-white p-3.5 rounded-2xl rounded-tr-sm shadow-sm leading-relaxed max-w-[80%]">${text}</div></div>`;
+        input.value = ''; 
+        msgDiv.scrollTop = msgDiv.scrollHeight;
+        
+        // 2. 顯示打字中的模擬動畫
         const loadingId = 'loading-' + Date.now();
         msgDiv.innerHTML += `<div id="${loadingId}" class="flex items-start gap-2"><div class="w-7 h-7 rounded-full bg-[#FDFDFD] border border-[#D1D1D1] flex items-center justify-center flex-shrink-0 shadow-sm"><i data-lucide="more-horizontal" class="w-3.5 h-3.5 text-[#e26a1f] stroke-[2] animate-pulse"></i></div></div>`;
-        lucide.createIcons(); msgDiv.scrollTop = msgDiv.scrollHeight;
+        lucide.createIcons(); 
+        msgDiv.scrollTop = msgDiv.scrollHeight;
 
-        const reply = await callGeminiAPI(chatHistory, systemPrompt);
-        chatHistory.push({ role: 'model', text: reply });
+        // 3. 【進階版】關鍵字模擬智庫邏輯
+        let reply = "";
+        const lowerText = text.toLowerCase();
         
-        document.getElementById(loadingId).remove();
-        msgDiv.innerHTML += `<div class="flex items-start gap-2"><div class="w-7 h-7 rounded-full bg-[#FDFDFD] border border-[#D1D1D1] flex items-center justify-center flex-shrink-0 shadow-sm"><i data-lucide="message-circle-heart" class="w-3.5 h-3.5 text-[#e26a1f] stroke-[2]"></i></div><div class="bg-[#FDFDFD] p-3.5 rounded-2xl rounded-tl-sm border border-[#D1D1D1] shadow-sm text-[#2B2D2F] leading-relaxed max-w-[80%]">${reply.replace(/\n/g, '<br>')}</div></div>`;
-        lucide.createIcons(); msgDiv.scrollTop = msgDiv.scrollHeight;
+        // 判斷邏輯：涵蓋更多同義詞
+        if (lowerText.match(/壓力|累|撐不住|喘不過氣|辛苦|緊繃/)) {
+            reply = "看著你寫下的文字，我感受到了那份沉重。就像山林裡的「觀音坐蓮」，在遇到乾旱缺水時，它會選擇主動掉落老葉來保全核心。現在的你，是不是也承擔了太多呢？試著放下一點包袱吧。明天，你願意給自己一個好好深呼吸、什麼都不想的十分鐘嗎？";
+        } 
+        else if (lowerText.match(/平凡|沒人看見|默默|不起眼|邊緣|不被重視/)) {
+            reply = "默默付出卻沒被看見，心裡難免會有些失落吧。但你知道嗎？平溪的「大葉仙茅」也是這樣，它長在陰暗的林底，用最寬廣的身軀包裹住生活的重量，不被看見也能撐起一切。你的努力其實非常有價值。你上一次好好稱讚、感謝默默撐到現在的自己，是什麼時候了呢？";
+        } 
+        else if (lowerText.match(/失敗|破碎|難過|挫折|想哭|痛/)) {
+            reply = "這陣子辛苦你了，受傷的感覺一定很不好受。我想起了歷經大滅絕卻依然活下來的活化石──「雙扇蕨」。老朋友，即使外表看起來有些破碎，你內在的生命編碼依然強大。現在不堅強也沒關係的，要不要閉上眼睛，聽聽內心的聲音，今晚先好好睡一覺呢？";
+        } 
+        else if (lowerText.match(/平靜|競爭|討厭|煩躁|比較|焦慮/)) {
+            reply = "想尋求一片寧靜的心情，山林都聽到了。如同這片山谷裡的「蕨類」，不爭陽光，在最陰暗的角落也能活出一片翠綠。不爭，故無所不容。在這裡，你不需要和任何人比較。此刻，你有感覺到周圍微風帶來的涼意，和內心那股慢慢沉澱下來的平靜嗎？";
+        } 
+        else if (lowerText.match(/開心|快樂|好棒|成就|期待/)) {
+            // 新增正向情緒的回饋
+            reply = "看到你現在的心情，我也跟著明亮了起來！這就像「台灣山菊」一樣，即使在深冬的石縫中，也能開出最溫暖的黃色花朵。這份力量是你自己淬鍊出來的無可取代。請把這個美好的片刻好好收藏在心裡喔！";
+        }
+        else {
+            // 隨機抽取一句萬用回覆，避免一直重複
+            const randomIndex = Math.floor(Math.random() * fallbackReplies.length);
+            reply = fallbackReplies[randomIndex];
+        }
+
+        // 4. 模擬真人思考時間，1.5秒後跳出回應
+        setTimeout(() => {
+            document.getElementById(loadingId).remove();
+            // 將原本粗體的 **文字** 替換成帶有強調色的 HTML 以增加質感
+            const formattedReply = reply.replace(/「(.*?)」/g, '<span class="text-[#e26a1f] font-bold">「$1」</span>');
+            
+            msgDiv.innerHTML += `<div class="flex items-start gap-2"><div class="w-7 h-7 rounded-full bg-[#FDFDFD] border border-[#D1D1D1] flex items-center justify-center flex-shrink-0 shadow-sm"><i data-lucide="message-circle-heart" class="w-3.5 h-3.5 text-[#e26a1f] stroke-[2]"></i></div><div class="bg-[#FDFDFD] p-3.5 rounded-2xl rounded-tl-sm border border-[#D1D1D1] shadow-sm text-[#2B2D2F] leading-relaxed max-w-[80%]">${formattedReply}</div></div>`;
+            lucide.createIcons(); 
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+        }, 1500);
     }
+    
     function handleChatEnter(e) { if(e.key === 'Enter') sendChatMessage(); }
 
     function initDraggableFab() {
